@@ -4,6 +4,11 @@
             <form class="theme-form theme-form-2 mega-form" action="/admin/add/product" method="post" enctype="multipart/form-data">
                 <div class="card">
                     <div class="card-body">
+                        {{#if productImgError}}
+                            <div class="alert alert-danger" role="alert">
+                                {{productImgError}}!
+                            </div>
+                        {{/if}}
                         <div class="card-header-2">
                             <h5>Add New Product</h5>
                         </div>
@@ -81,7 +86,7 @@
                                 class="col-sm-3 col-form-label form-label-title">Thumbnail Image</label>
                             <div class="col-sm-9">
                                 <input class="form-control form-choose" name="thumbnail_image" type="file"
-                                    id="formFile">
+                                    id="formFile" required>
                             </div>
                         </div>
                     </div>

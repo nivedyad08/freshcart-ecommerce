@@ -115,7 +115,7 @@ const products = async (req, res) => {
 };
 const addProductView = async (req, res) => {
   try {
-    const categories = await Category.find({}).lean();
+    const categories = await Category.find({status:true}).lean();
     res.render("product/addProduct", {
       title: "Products",
       categories: categories,
@@ -126,16 +126,19 @@ const addProductView = async (req, res) => {
 };
 const addProduct = async (req, res) => {
   try {
-    const thumbnail = req.files.thumbnail_image;
-    req.body.images = req.files.product_images.map(function (obj) {
-      return obj.filename;
-    });
-    if (thumbnail) {
-      req.body.thumbnail_image = thumbnail[0].filename;
-    }
-    req.body.status = 1;
-    const newProduct = await Product.insertMany(req.body);
-    res.redirect("/admin/products");
+      if(!req.error){
+        req.body.images = req.files.product_images.map(function (obj) {
+          return obj.filename;
+        }) ;
+        if (req.thumbnail_image) {
+          req.body.thumbnail_image = req.thumbnail_image;
+        }
+        req.body.status = 1;
+        const newProduct = await Product.insertMany(req.body);
+        res.redirect("/admin/products");
+      }else{
+        res.render('product/addProduct',{productImgError:"Upload valid image"})
+      }
   } catch (error) {
     console.log(error.message);
   }
@@ -539,8 +542,8 @@ const salesReport = async (req, res) => {
     }
     const salesReport = await Order.find({
       date: {
-        $gte: fromDate?.moment(fromDate).format('YYYY-MM-DD'),
-        $lt: toDate?.moment(toDate).format('YYYY-MM-DD'),
+        $gte: fromDate?.moment(fromDate).format("YYYY-MM-DD"),
+        $lt: toDate?.moment(toDate).format("YYYY-MM-DD"),
       },
     }).lean();
     console.log(salesReport);
@@ -612,7 +615,7 @@ const revenueReport = async (req, res) => {
         },
       },
     ]);
-  
+
     res.json({
       monthWiseRevenue: monthWiseRevenue,
       yearWiseRevenue: yearWiseRevenue,
