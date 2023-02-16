@@ -1,3 +1,6 @@
 body{
     overflow-x: hidden;
 }
+.card-product {
+    height: 96% !important;
+}

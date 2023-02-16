@@ -38,7 +38,7 @@ const userHome = async (req, res) => {
 const showProducts = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   try {
-    const categoryProducts = await Product.find({ category_id: req.params.id })
+    const categoryProducts = await Product.find({ category_id: req.params.id,status:true })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .lean()
