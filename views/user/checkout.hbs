@@ -1,0 +1,395 @@
+<main>
+  <!-- section -->
+  <section class="mb-lg-14 mb-8 mt-8">
+    <div class="container">
+      <!-- row -->
+      <div class="row">
+        <!-- col -->
+        <div class="col-12">
+          <div>
+            <div class="mb-8">
+              <!-- text -->
+              <h1 class="fw-bold mb-0">Checkout</h1>
+            </div>
+          </div>
+        </div>
+        <span id = "error-message" style="color:red"> </span> <br><br>  
+      </div>
+      <div>
+        <!-- row -->
+        <div class="row">
+          <div class="col-lg-7 col-md-12">
+            <!-- accordion -->
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+              <!-- accordion item -->
+              <div class="accordion-item py-4">
+
+                <div class="d-flex justify-content-between align-items-center">
+                  <!-- heading one -->
+                  <a
+                    href="#"
+                    class="fs-5 text-inherit collapsed h4"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#flush-collapseOne"
+                    aria-expanded="true"
+                    aria-controls="flush-collapseOne"
+                  >
+                    <i class="feather-icon icon-map-pin me-2 text-muted"></i>Add
+                    delivery address
+                  </a>
+                  <!-- btn -->
+                  <a
+                    href="/account-address"
+                    class="btn btn-outline-primary btn-sm"
+                  >Add a new address </a>
+                  <!-- collapse -->
+                </div>
+                <div
+                  id="flush-collapseOne"
+                  class="accordion-collapse collapse show"
+                  data-bs-parent="#accordionFlushExample"
+                >
+                  <div class="mt-5">
+                    <div class="row">
+                        {{#each userAddress}}
+                            <div class="col-lg-6 col-12 mb-4">
+                                <!-- form -->
+                                <div class="border p-6 rounded-3">
+                                <div class="form-check mb-4">
+                                    <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    id="address"
+                                    value="{{id}}"
+                                    name="address"
+                                    />
+                                    <label
+                                    class="form-check-label text-dark"
+                                    for="homeRadio"
+                                    >
+                                    {{addrname}}
+                                    </label>
+                                </div>
+                                <!-- address -->
+                                <address>
+                                    <strong>{{firstName}} {{lastName}}</strong>
+                                    <br />
+
+                                    {{address1}},
+                                    <br />
+
+                                    {{address2}},{{city}}, {{state}}, {{country}}<br />
+
+                                    <abbr title="pincode">PinCode: {{zipCode}}</abbr></address>
+                                {{!-- <span class="text-danger">Default address </span> --}}
+
+                                </div>
+                            </div>
+                        {{/each}}
+                        <input type="hidden" class="form-control" id="userId" name="userId" value="{{headerData.user._id}}">
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <!-- accordion item -->
+              <div class="accordion-item py-4">
+
+                <a
+                  href="#"
+                  class="text-inherit h5"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#flush-collapseFour"
+                  aria-expanded="false"
+                  aria-controls="flush-collapseFour"
+                >
+                  <i
+                    class="feather-icon icon-credit-card me-2 text-muted"
+                  ></i>Payment Method
+                  <!-- collapse -->
+                </a>
+                <div
+                  id="flush-collapseFour"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#accordionFlushExample"
+                >
+
+                  <div class="mt-5">
+                    <div>
+
+                    <div class="card card-bordered shadow-none mb-2">
+                        <!-- card body -->
+                        <div class="card-body p-6">
+                          <div class="d-flex">
+                            <div class="form-check">
+                              <!-- checkbox -->
+                              <input
+                                class="form-check-input"
+                                type="radio"
+                                id="paypal"
+                                value="1"
+                                name="payment_method"
+                              />
+                              <label class="form-check-label ms-2" for="paypal">
+
+                              </label>
+                            </div>
+                            <div>
+                              <!-- title -->
+                              <h5 class="mb-1 h6"> Payment with Paypal</h5>
+                              <p class="mb-0 small">You will be redirected to
+                                PayPal website to complete your purchase
+                                securely.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- card -->
+                      <div class="card card-bordered shadow-none">
+                        <div class="card-body p-6">
+                          <!-- check input -->
+                          <div class="d-flex">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input"
+                                type="radio"
+                                id="cashonDelivery"
+                                value="3"
+                                name="payment_method"
+                              />
+                              <label
+                                class="form-check-label ms-2"
+                                for="cashonDelivery"
+                              >
+
+                              </label>
+                            </div>
+                            <div>
+                              <!-- title -->
+                              <h5 class="mb-1 h6"> Cash on Delivery</h5>
+                              <p class="mb-0 small">Pay with cash when your
+                                order is delivered.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Button -->
+                      <div class="mt-5 d-flex justify-content-end">
+                        <a
+                          href="#"
+                          class="btn btn-outline-gray-400 text-muted"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#flush-collapseThree"
+                          aria-expanded="false"
+                          aria-controls="flush-collapseThree"
+                        >Prev</a>
+                        <a  class="btn btn-primary ms-2" onclick="placeOrder()">Place Order</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="col-12 col-md-12 offset-lg-1 col-lg-4">
+            <div class="mt-4 mt-lg-0">
+              <div class="card shadow-sm">
+                <h5 class="px-6 py-4 bg-transparent mb-0">Order Details</h5>
+                <ul class="list-group list-group-flush">
+                  {{#each cartItems}}
+                    <li class="list-group-item px-4 py-3">
+                      <div class="row align-items-center">
+                        <div class="col-2 col-md-2">
+                          <img
+                            src="/admin/images/products/{{product.0.thumbnail_image}}"
+                            alt="{{product.0.name}}"
+                            class="img-fluid"
+                          /></div>
+                        <div class="col-5 col-md-5">
+                          <h6 class="mb-0">{{product.0.name}}</h6>
+                          <span><small class="text-muted">₹
+                              {{product.0.price}}
+                              /{{product.0.unit}}</small></span>
+
+                        </div>
+                        <div class="col-2 col-md-2 text-center text-muted">
+                          <span>{{product.0.cart_quatity}}</span>
+
+                        </div>
+                        <div
+                          class="col-3 text-lg-end text-start text-md-end col-md-3"
+                        >
+                          <span class="fw-bold">₹ {{productAmount}}</span>
+
+                        </div>
+                      </div>
+                    </li>
+                  {{/each}}
+                  <!-- list group item -->
+                  <li class="list-group-item px-4 py-3">
+                    <div
+                      class="d-flex align-items-center justify-content-between mb-2"
+                    >
+                      <div>
+                        Item Subtotal
+
+                      </div>
+                      <div class="fw-bold">
+                        ₹
+                        {{totalCartSum}}
+                      </div>
+
+                    </div>
+                    <div
+                      class="d-flex align-items-center justify-content-between"
+                    >
+                      <div>
+                        Coupon
+
+                      </div>
+                      <div class="fw-bold">
+                        ₹ <span id="coupon">{{couponAmount}}</span>
+                      </div>
+                    </div>
+                    <div id="coupon-badge" style="display: none;">
+                      <span class="badge bg-warning text-dark"><span id="coupon-applied"></span> Coupon applied !!</span>
+                    </div>
+                  </li>
+                  <!-- list group item -->
+                  <li class="list-group-item px-4 py-3">
+                    <div
+                      class="d-flex align-items-center justify-content-between fw-bold"
+                    >
+                      <div>
+                        Subtotal
+                      </div>
+                      <div>
+                        ₹
+                        <span id="total">{{totalCartSum}}</span>
+                        <input type="hidden" name="" id="total" value="{{totalCartSum}}">
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item px-4 py-3">
+                    <div class="mt-8">
+                    <h2 class="h5 mb-3">Add Promo or Gift Card</h2>
+                    <span id="coupon-error-message" style="color:red"> </span> <br><br>  
+                      <div class="mb-2">
+                        <!-- input -->
+                        <label for="giftcard" class="form-label sr-only">Email
+                          address</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="giftcard" name="coupon"
+                          placeholder="Promo or Gift Card"
+                        />
+                        <input type="hidden" name="couponAmount" id="couponAmount">
+                      </div>
+                      <!-- btn -->
+                      <div class="d-grid" onclick="redeemCoupon()"><button
+                          type="button"
+                          class="btn btn-outline-dark mb-1" 
+                        >Redeem</button></div>
+                      <p class="text-muted mb-0">
+                        <small>Terms & Conditions apply</small></p>
+                  </div>
+                  </li>
+                </ul>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" value="{{totalCartSum}}" id="actualAmount">
+    </div>
+  </section>
+</main>
+
+<script>
+  let totalAmount;
+  let couponApplied;
+
+  async function redeemCoupon(){
+      const coupon = document.getElementById('giftcard').value
+      let response = await fetch('/redeem-coupon', {
+          method: 'put',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({coupon:coupon}),
+      });
+      let result = await response.json();
+        if(result.error ){
+           document.getElementById('coupon-error-message').innerText= result.error
+        }else{
+          couponApplied = coupon
+          const amount = result.amount
+          const actualAmount = document.getElementById('actualAmount').value
+          const deductAmount = actualAmount*amount/100;
+          const newAmount = (actualAmount-deductAmount).toFixed(2)
+          document.getElementById('couponAmount').value = amount
+          document.getElementById('coupon').innerText = deductAmount
+          document.getElementById('total').innerText = newAmount
+          totalAmount = newAmount
+
+          $('#coupon-badge').show()
+          document.getElementById('coupon-applied').innerText = coupon          
+          document.getElementById('error-message').innerText =""
+          document.getElementById('coupon-error-message').innerText= ""
+        }
+    }
+    async function placeOrder(){
+        const selectedMethod = $("input[type='radio'][name='payment_method']:checked").val();
+        const selectedAdress = $("input[type='radio'][name='address']:checked").val();
+        if(!selectedAdress || !selectedMethod){
+            document.getElementById('error-message').innerText ='Please select the options to place the order !!!'
+        }else{
+          const userId = document.getElementById('userId').value;
+          const orderDetails = {
+              selectedMethod:selectedMethod,
+              selectedAdress:selectedAdress,
+              userId:userId,
+              total:totalAmount,
+              coupon:couponApplied,
+          }
+          const orderplacement = await fetch('/place/order',{
+              method :'post',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body:JSON.stringify(orderDetails)
+          })
+          let res = await orderplacement.json()
+          console.log(res)
+          if(res == 'success'){
+              Swal.fire({
+                  title: 'Success',
+                  text: "Order Plcaed Successfully !",
+                  icon: 'success',
+                  confirmButtonColor: '#3085d6',
+                  cancelButtonColor: '#d33',
+                  confirmButtonText: 'OK',
+                  timer: 3000
+              }).then(()=>{
+                document.location.href = '/orders'
+              })
+          }else if(res.method == 'paypal'){
+            document.location.href = '/paypal-checkout/'+userId+'/'+total+'/'+res.address
+          }
+          else{
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: 'Something went wrong!',
+              })
+          }
+        }
+    }
+</script>

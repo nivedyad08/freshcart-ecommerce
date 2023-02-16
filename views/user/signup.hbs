@@ -1,0 +1,87 @@
+<main>
+<!-- section -->
+    <section class="my-lg-14 my-8">
+        <!-- container -->
+        <div class="container">
+        <!-- row -->
+            <div class="row justify-content-center align-items-center">
+                <div class="col-12 col-md-6 col-lg-4 order-lg-1 order-2">
+                <!-- img -->
+                    <img src="/user/images/svg-graphics/signup-g.svg" alt="" class="img-fluid">
+                </div>
+                <!-- col -->
+                <div class="col-12 col-md-6 offset-lg-1 col-lg-4 order-lg-2 order-1">
+                    <div class="mb-lg-9 mb-5">
+                        <h1 class="mb-1 h2 fw-bold">Get Start Shopping</h1>
+                        <p>Welcome to FreshCart! Enter your email to get started.</p>
+                    </div>
+                    {{#if message}}
+                        <div class="alert alert-success" role="alert">
+                            {{message}}
+                        </div>
+                    {{else if error}}
+                        <div class="alert alert-danger" role="alert">
+                            {{error}}
+                        </div>
+                    {{/if}}
+                    <!-- form -->
+                    <form action="/user/signup" method="post" onsubmit="return verifyPassword(this)">
+                        <div class="row g-3">
+                        <!-- col -->
+                        <div class="col">
+                            <!-- input --><input type="text" class="form-control" pattern="(^[A-Za-z]+$)$" title="Please enter a valid name" placeholder="First name" name="first_name" aria-label="First name"
+                            required>
+                        </div>
+                        <div class="col">
+                            <!-- input --><input type="text" class="form-control" pattern="(^[A-Za-z]+$)$" title="Please enter a valid name" placeholder="Last name" name="last_name" aria-label="Last name"
+                            required>
+                        </div>
+                        <div class="col-12">
+
+                            <!-- input --><input type="email" class="form-control" title="please enter a valid email" id="inputEmail4" placeholder="Email" name="email" required>
+                        </div>
+                        <div class="col-12">
+
+                            <!-- input --><input type="password" class="form-control" title="password should contain atleast 6 character" pattern="^.{6,}$" id="inputPassword4" name="password" placeholder="Password"
+                            required>
+                        </div>
+                        <div class="col-12">
+
+                            <!-- input --><input type="password" class="form-control" title="password should contain atleast 6 character" pattern="^.{6,}$" id="inputPassword4" name="confPassword" placeholder="Confirm Password"
+                            required>
+                        </div>
+                        <!-- btn -->
+                        <div class="col-12">
+
+                            <!-- input --><input type="text" class="form-control" title="please enter a valid phone number" pattern="^\d{10}$" id="inputPassword4" name="phone" placeholder="Phone Number"
+                            required>
+                        </div>
+                        <div class="col-12 d-grid"> <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                        <span id = "message" style="color:red"> </span> <br><br>  
+                        <!-- text -->
+                        <p><small>By continuing, you agree to our <a href="#!"> Terms of Service</a> & <a href="#!">Privacy
+                                Policy</a></small></p>
+                        <div>
+                            Already have an account? <a href="/user/signin">Sign in</a>
+                        </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    function verifyPassword(form){
+        if(!(form.password.value == form.confPassword.value)){
+            document.getElementById('message').innerHTML = "Password must be the same"
+            return false;
+        }else{
+            form.submit()
+            return false;
+        }
+        
+    }
+</script>

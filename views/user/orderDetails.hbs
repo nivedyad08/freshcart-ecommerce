@@ -1,0 +1,233 @@
+ <main>
+  <!-- section -->
+  <section>
+    <div class="container">
+      <!-- row -->
+      <div class="row">
+        <!-- col -->
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center d-md-none py-4">
+            <!-- heading -->
+            <h3 class="fs-5 mb-0">Account Setting</h3>
+            <!-- button -->
+            <button class="btn btn-outline-gray-400 text-muted d-md-none btn-icon btn-sm ms-3 " type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasAccount" aria-controls="offcanvasAccount">
+              <i class="bi bi-text-indent-left fs-3"></i>
+            </button>
+          </div>
+        </div>
+        <!-- col -->
+        {{> user-account}}
+            <div class="col-lg-9 col-md-8 col-12">
+          <div class="py-6 p-md-6 p-lg-10">
+            <div class="d-flex justify-content-between mb-6">
+              <!-- heading -->
+              <h2 class="mb-0">Order Details</h2>
+              <!-- button -->
+              {{#with orderDetails}}
+                {{#if ../invoice}}
+                  <a onclick="downloadInvoice()" class="btn btn-outline-primary">Download Invoice</a>
+                {{/if}}
+              {{/with}}
+            </div>
+            <div class="row">
+              <div class="table-responsive border-0 col-md-8">
+                <!-- Table -->
+                <table class="table mb-0 text-nowrap">
+                  <!-- Table Head -->
+                  <thead class="table-light">
+                    <tr>
+                      <th class="border-0">Product</th>
+                      <th class="border-0"></th>
+                      <th class="border-0">Price</th>
+                      <th class="border-0">Quantity</th>
+                      <th class="border-0"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr id="order_">
+                      {{#each products}}
+                        <td class="align-middle border-top-0 w-0">
+                          <a href="/product/{{name}}/{{_id}}"> <img src="/admin/images/products/{{image}}" alt="{{name}}"
+                              class="icon-shape icon-xl"></a><br>
+                          <span><small class="text-muted">₹ {{price}} / {{unit}}</small></span>
+                        </td>
+                        <td class="align-middle border-top-0">
+                            <a href="#" class="fw-semi-bold text-inherit">
+                            <h6 class="text-muted mb-0">{{name}}</h6>
+                          </a>
+                        </td>
+                        <td class="align-middle border-top-0">
+                            <a href="#" class="fw-semi-bold text-inherit">
+                            <h6 class="mb-0">₹ {{price}}</h6>
+                          </a>
+                        </td>
+                        <td class="align-middle border-top-0">
+                        <a class="text-inherit">{{quantity}}</a>
+                      </td>
+                        <td class="align-middle border-top-0">
+                          <a class="text-inherit">{{payment_method}}</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                  </tbody>
+                  {{#with orderDetails}}
+                  <tfoot>
+                    <tr class="table-order">
+                        <td colspan="3">
+                            <h5>Subtotal :</h5>
+                        </td>
+                        <td>
+                            <h5>₹ <span id="subtotal">{{../subtotal}}</span></h5>
+                        </td>
+                    </tr>
+
+                    <tr class="table-order">
+                        <td colspan="3">
+                            <h5>Coupon</h5>
+                        </td>
+                        <td>
+                            <h5>₹ <span id="coupon">{{couponAmount}}</span></h5>
+                        </td>
+                    </tr>
+
+                    <tr class="table-order">
+                        <td colspan="3">
+                            <h4 class="theme-color fw-bold">Total Price :</h4>
+                        </td>
+                        <td>
+                            <h4 class="theme-color fw-bold">₹ <span id="total">{{total_amount}}</span></h4>
+                        </td>
+                    </tr>
+                </tfoot>
+                </table>
+              </div>
+              <div class="col-xl-4">
+                  <div class="order-success">
+                      <div class="row g-4">
+                          <h4>summary</h4>
+                          <ul class="order-details">
+                              <li>Order ID: {{orderId}}</li>
+                              <li>Order Date: <span id="date">{{../orderDate}}</span></li>
+                              <input type="hidden" id="orderId" value="{{_id}}">
+                          </ul>
+                          <div class="payment-mode">
+                              <h4>payment method</h4>
+                              <p>{{payment_method}}</p>
+                          </div>
+                      {{/with}}
+                          <h4>shipping address</h4>
+                          <ul class="order-details">
+                              {{#each address}}
+                                  <li id="name">{{firstName}} {{lastName}}</li>
+                                  <li id="address">{{address1}},{{address2}}</li>
+                                  <li id="place">{{city}} ,{{state}},{{country}} ,{{zipCode}}</li>
+                              {{/each}}
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+    async function downloadInvoice(){
+      const name= document.getElementById('name').innerText
+      const address= document.getElementById('address').innerText
+      const place= document.getElementById('place').innerText
+      const orderId= document.getElementById('orderId').value
+      const date= document.getElementById('date').innerText
+      const total= document.getElementById('total').innerText
+      const coupon= document.getElementById('coupon').innerText
+      const subtotal= document.getElementById('subtotal').innerText
+
+       let response = await fetch('/download/invoice/'+orderId, {
+          method: 'put',
+      });
+        let result = await response.json();
+        const productArray = result.products.map((item)=>{
+          return {
+            quantity: item.quantity,
+            description: item.name,
+            price: item.price
+          }
+        })
+        var data = {
+          "currency": "INR",
+          "marginTop": 25,
+          "marginRight": 25,
+          "marginLeft": 25,
+          "marginBottom": 25,
+        //"logoExtension": "png", //only when logo is base64
+          "sender": {
+              "company": "Fresh Cart",
+              "address": "MG Road, Bangalore East",
+              "zip": "560001",
+              "city": "karnataka, Banglore",
+              "country": "India"
+          },
+          "client": {
+              "company": name,
+              "address": address,
+              "place": place,
+          },
+          "information": {
+              // Invoice number
+              "number": result.invoice.invoiceId,
+              // Invoice data
+              "date": result.invoiceDate,
+              // Invoice due date
+          },
+          "translate": {
+            "subtotal": subtotal, // Defaults to 'Subtotal'
+            "product-total": coupon, // Defaults to 'Total'
+            "total": total // Defaults to 'Total'
+          },
+          "orderId": orderId,
+          "orderDate": date,
+          "products": productArray,
+          "bottomNotice": "Kindly pay your invoice within 15 days."
+        };
+        easyinvoice.createInvoice(data, function (result) {
+            // The response will contain a base64 encoded PDF file
+            console.log('PDF base64 string: ', result.pdf);
+            easyinvoice.download("invoice.pdf")
+        });
+    }
+</script>
+
+<style>
+  .order-success{
+    padding: calc(20px + (30 - 20) * ((100vw - 320px) / (1920 - 320)));
+    border-radius: 5px;
+    background-color: #f9f9f6;
+  }
+  .order-success h4{
+    font-weight: 700;
+    text-transform: capitalize;
+    font-size: 16px;
+    color: #212529;
+  }
+  .order-details{
+    list-style: none;
+  }
+  .table-order h5{
+    color: #212529;
+    font-size: calc(15px + (16 - 15) * ((100vw - 320px) / (1920 - 320)));
+    line-height: 1.2;
+    font-weight: 400;
+  }
+  #pdf {
+      text-align: center;
+  }
+
+  #pdf canvas {
+      border: 1px solid black;
+      width: 95%;
+}
+</style>

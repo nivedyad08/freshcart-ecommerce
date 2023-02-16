@@ -1,0 +1,168 @@
+<main>
+  <div class="mt-4">
+    <div class="container">
+      <!-- row -->
+      <div class="row ">
+      </div>
+    </div>
+  </div>
+  <section class="mt-8">
+    <div class="container">
+      <div class="row">
+        {{#each products}}
+            <div class="col-md-6">
+            <!-- img slide -->
+            <div class="product" id="product">
+                <div class="zoom" onmousemove="zoom(event)"
+                style="background-image: url(/admin/images/products/{{thumbnail_image}}">
+                <!-- img -->
+                <!-- img --><img src="/admin/images/products/{{thumbnail_image}}" alt="">
+                </div>
+            </div>
+            <!-- product tools -->
+            <div class="product-tools">
+                <div class="thumbnails row g-3" id="productThumbnails">
+                {{#each images}}
+                    <div class="col-3">
+                        <div class="thumbnails-img">
+                        <!-- img -->
+                        <img src="/admin/images/products/{{this}}" alt="">
+                        </div>
+                    </div>
+                {{/each}}
+                </div>
+            </div>
+            </div>
+            <div class="col-md-6">
+            <div class="ps-lg-10 mt-6 mt-md-0">
+                <!-- content -->
+                {{#each category}}
+                    <a href="#!" class="mb-4 d-block">{{name}}</a>
+                {{/each}}
+                <!-- heading -->
+                <h1 class="mb-1">{{name}}</h1>
+                <div class="mb-4">
+                <!-- price --><span class="fw-bold text-dark">₹ {{price}}</span> 
+                    {{!-- <span
+                    class="text-decoration-line-through text-muted">$35</span><span><small class="fs-6 ms-2 text-danger">26%
+                    Off</small></span> --}}
+                </div>
+                <!-- hr -->
+                <hr class="my-6">
+                {{!-- <div class="mb-5"><button type="button" class="btn btn-outline-secondary">250g</button>
+                 <button type="button" class="btn btn-outline-secondary">500g</button>
+                <button type="button" class="btn btn-outline-secondary">1kg</button></div>
+                <div> --}}
+                    <!-- input -->
+                {{#if quantity}}
+                    <div class="input-group input-spinner" onclick="getQuantity()" >
+                        <input type="button"  value="-" class="button-minus  btn  btn-sm " data-field="quantity">
+                        <input type="number" step="1" min="1" max="{{quantity}}" value="1" name="quantity" id="quantity" class="quantity-field form-control-sm form-input">
+                        <input type="button" value="+" id="button-plus" class="button-plus btn btn-sm " data-field="quantity">
+                    </div>
+                    <div class="mt-3 row justify-content-start g-2 align-items-center">
+                    
+                        <div class="col-xxl-4 col-lg-4 col-md-5 col-5 d-grid">
+                            <button type="button" onclick="addToCart('{{name}}','{{_id}}')" class="btn btn-primary"><i class="feather-icon icon-shopping-bag me-2"></i>Add to
+                            cart</button>
+                        </div>
+                        {{#if error}}
+                             <span id = "message" style="color:red">{{error}} </span> <br><br>  
+                        {{/if}}
+                        <div class="col-md-4 col-4">
+                            <!-- btn -->
+                            <a class="btn btn-light " href="#" data-bs-toggle="tooltip" data-bs-html="true" aria-label="Wishlist"><i class="feather-icon icon-heart"></i></a>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="alert alert-warning" role="alert">
+                        Out of Stock !!
+                    </div>
+                {{/if}}
+                <!-- hr -->
+                <hr class="my-6">
+                <div>
+                <!-- table -->
+                <table class="table table-borderless">
+
+                    <tbody>
+                    <tr>
+                        <td>Product Name    :</td>
+                        <td>{{name}}</td>
+
+                    </tr>
+                    <tr>
+                        <td>Availability    :</td>
+                        {{#if quantity}}
+                            <td>In Stock</td>
+                        {{else}}
+                            <td>Out of Stock</td>
+                        {{/if}}
+
+                    </tr>
+                    <tr>
+                        <td>Type    :</td>
+                        {{#each category}}
+                            <td>{{name}}</td>
+                        {{/each}}
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <style>
+    .zoom{
+        background-repeat: no-repeat !important;
+    }
+  </style>
+
+  <script>
+    function getQuantity(value){
+        let max_value   = $('#quantity').attr('max')
+        let quantity    = document.getElementById('quantity').value
+        var incrementor = document.getElementById('button-plus')
+        if(quantity == max_value){
+            incrementor.setAttribute("disabled", true);
+        }else if(quantity<max_value){
+            incrementor.removeAttribute("disabled");
+        }
+        var decrementor = document.getElementById('button-minus')
+        if(quantity == 0){
+            decrementor.setAttribute("disabled", true);
+        }else if(quantity<0){
+            decrementor.removeAttribute("disabled");
+        }
+    }
+
+    function addToCart(name,id){
+        let quantity = document.getElementById('quantity').value
+        $.ajax({
+            async   :true,
+            url     :'/product/'+name+'/'+id,
+            type    :'put',
+            data    :{quantity},
+            beforeSend: function (request) {
+                return request.setRequestHeader('X-CSRF-Token', $("meta[name='csrf-token']").attr('content'));
+            },
+            success :function(response){
+                if(response == 'success'){
+                    window.location.reload();
+                }else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Please signin to add the item to the cart!',
+                    })
+                }
+            }
+        })
+       
+    }
+  </script>
