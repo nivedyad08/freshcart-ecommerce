@@ -137,7 +137,8 @@ const addProduct = async (req, res) => {
         const newProduct = await Product.insertMany(req.body);
         res.redirect("/admin/products");
       }else{
-        res.render('product/addProduct',{productImgError:"Upload valid image"})
+        const categories = await Category.find({status:true}).lean();
+        res.render('product/addProduct',{productImgError:"Upload valid image",categories:categories})
       }
   } catch (error) {
     console.log(error.message);
