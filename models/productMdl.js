@@ -13,12 +13,12 @@ const productSchema = new Schema({
         type    : ObjectId,
         required:true
     },
-    price        :{
-        type     :Number,
-        required:true
-    },
     quantity        :{
         type    : Number,
+        required:true
+    },
+    price        :{
+        type     :Number,
         required:true
     },
     unit        :{
