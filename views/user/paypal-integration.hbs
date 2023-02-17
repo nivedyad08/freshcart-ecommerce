@@ -31,7 +31,7 @@
         return actions.order.capture().then(function(orderData) {
            $.ajax({
             async   :true,
-             url     :'/paypal/place/order',
+            url     :'/paypal/place/order',
             type    :'post',
             data    :{userId:userId},
             beforeSend: function (request) {

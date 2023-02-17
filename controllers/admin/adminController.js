@@ -166,7 +166,6 @@ const editProductView = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
-    console.log(678901111);
     if (req.files.product_images) {
       req.body.images = req.files.product_images.map(function (obj) {
         return obj.filename;

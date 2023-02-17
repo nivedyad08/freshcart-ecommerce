@@ -54,7 +54,7 @@ const categoryUpload = multer({ storage: storage });
 const productUpload = multer({
   storage: productStorage,
   fileFilter,
-  limits: { fileSize: 400000 },
+  limits: { fileSize: 4000000 },
 });
 
 module.exports = {

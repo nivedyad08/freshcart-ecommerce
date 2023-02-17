@@ -67,7 +67,7 @@ const searchProducts = async (req, res) => {
     const getProduct = await Product.find({
       status: { $ne: false },
       name: { $regex: `${search}.*`, $options: "i" },
-    });
+    }).lean();
     const categories = await Category.find({ status: true }).lean();
     res.render("product-search", {
       products: getProduct,
