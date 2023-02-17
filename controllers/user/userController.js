@@ -422,10 +422,14 @@ const checkout = async (req, res) => {
 };
 
 /* ----------------Order Placement--------------  */
+let paypalUserId;
+let paypalTotalAmount;
+let paypalAddress;
 const orderPlacement = async (req, res) => {
   try {
-    let totalAmount;
     const { userId, selectedMethod, selectedAdress } = req.body;
+    paypalUserId = userId;
+    paypalAddress = selectedAdress;
     if (req.body.coupon) {
       Global_Coupon = req.body.coupon;
       const couponApplied = await Coupon.findOne(
@@ -440,6 +444,7 @@ const orderPlacement = async (req, res) => {
     } else {
       totalCartSum = actualCartAmount;
     }
+    paypalTotalAmount = totalCartSum;
     if (req.body.selectedMethod == 1) {
       res.json({
         method: "paypal",
@@ -463,25 +468,26 @@ const orderPlacement = async (req, res) => {
 
 /* ---------------Paypal Integration--------------  */
 const paypalCheckout = async (req, res) => {
-  const { userId, address } = req.params;
+  const userId = req.params.userId
   const user = await isAuth(req.session.user);
 
   res.render("paypal-integration", {
     categories: user.categories,
     headerData: user,
     cartCount: user.cartCount,
-    totalAmount: req.params.total,
+    totalAmount: paypalTotalAmount,
     userId: userId,
-    address: address,
+    address: paypalAddress,
   });
 };
 
 /* ----------------Paypal Checkout--------------  */
 const paypalSummary = async (req, res) => {
   try {
-    const { userId, selectedAdress } = req.body;
+    const userId = req.body.userId;
     const selectedMethod = 1;
-    const checkout = await checkoutFunc(userId, selectedMethod, selectedAdress);
+    const checkout = await checkoutFunc(userId, selectedMethod, paypalAddress);
+    console.log(checkout);
     if (checkout.message == "success") {
       const generateInvoice = await Invoice.invoiceGeneration(
         userId,
@@ -495,12 +501,10 @@ const paypalSummary = async (req, res) => {
 };
 
 /* ----------------Checkout function--------------  */
-const checkoutFunc = async (userId, selectedMethod, selectedAdress) => {
-  const userCartDetails = await User.find({ _id: userId });
-
+const checkoutFunc = async (userId, selectedMethod, paypalAddress) => {
+  const userCartDetails = await User.findById(userId);
   //Order Id
   const datetime = moment().format("YYYY-MM-DD");
-  console.log(datetime);
   const orderId = mathHelper();
   let method = "";
 
@@ -510,10 +514,9 @@ const checkoutFunc = async (userId, selectedMethod, selectedAdress) => {
     method = "Cash on delivery";
   }
 
-  const cart = userCartDetails[0].cart;
+  const cart = userCartDetails.cart;
   let totalOrderAmount = 0;
   let discount;
-
   const product = await Promise.all(
     cart.map(async (item) => {
       const productDetails = await Product.findOne({ _id: item.productId });
@@ -536,7 +539,7 @@ const checkoutFunc = async (userId, selectedMethod, selectedAdress) => {
   const data = {
     userId: userId,
     userName:
-      userCartDetails?.[0]?.first_name + " " + userCartDetails?.[0]?.last_name,
+      userCartDetails?.first_name + " " + userCartDetails?.last_name,
     product: product,
     orderId: orderId,
     coupon: Global_Coupon,
@@ -544,12 +547,13 @@ const checkoutFunc = async (userId, selectedMethod, selectedAdress) => {
     date: datetime,
     status: "Pending",
     payment_method: method,
-    addressId: selectedAdress,
+    addressId: paypalAddress,
     total_amount: totalOrderAmount,
   };
 
   try {
     const response = await Order.insertMany(data);
+    console.log(response);
     console.log(response[0]._id);
     const clearAll = await User.updateOne(
       { _id: userId },

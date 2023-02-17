@@ -15,7 +15,6 @@
   <script>
     const amount = document.getElementById('total').value
     const userId = document.getElementById('userId').value
-    const address = document.getElementById('address').value
     paypal.Buttons({
       // Sets up the transaction when a payment button is clicked
       createOrder: (data, actions) => {
@@ -34,7 +33,7 @@
             async   :true,
              url     :'/paypal/place/order',
             type    :'post',
-            data    :{userId:userId,address:address,method:'paypal'},
+            data    :{userId:userId},
             beforeSend: function (request) {
                 return request.setRequestHeader('X-CSRF-Token', $("meta[name='csrf-token']").attr('content'));
             },

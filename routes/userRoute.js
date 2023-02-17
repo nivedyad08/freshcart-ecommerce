@@ -39,7 +39,7 @@ userRoute.get('/address/edit/:id',authCheck.isUser ,userController.editAddress)
 userRoute.post('/address/update/:id',authCheck.isUser ,userController.updateAddress)
 //Checkout
 userRoute.post('/checkout/:userId',authCheck.isUser ,userController.checkout)
-userRoute.get('/paypal-checkout/:userId/:total/:address',authCheck.isUser ,userController.paypalCheckout)
+userRoute.get('/paypal-checkout/:userId',authCheck.isUser ,userController.paypalCheckout)
 userRoute.post('/paypal/place/order',authCheck.isUser ,userController.paypalSummary)
 userRoute.post('/place/order',authCheck.isUser ,userController.orderPlacement)
 //Orders

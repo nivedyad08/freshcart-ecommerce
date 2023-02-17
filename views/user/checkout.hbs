@@ -381,7 +381,7 @@
                 document.location.href = '/orders'
               })
           }else if(res.method == 'paypal'){
-            document.location.href = '/paypal-checkout/'+userId+'/'+total+'/'+res.address
+            document.location.href = '/paypal-checkout/'+userId
           }
           else{
               Swal.fire({
