@@ -454,9 +454,11 @@ const createCouponView = async (req, res) => {
   try {
     const categories = await Category.find({ status: true }).lean();
     const coupons = await Coupon.find().lean();
+    const date = moment().format("mm/DD/yyy");
     res.render("coupon/addCoupon", {
       categories: categories,
       coupons: coupons,
+      date:date
     });
   } catch (error) {
     console.log(error);

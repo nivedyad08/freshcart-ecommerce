@@ -21,12 +21,12 @@ const sendEMailVerification = async (firstname, lastname, email, userid) => {
             secure: false,
             requireTLS: true,
             auth: {
-                user: 'neethus484@gmail.com',
-                pass: 'dsjfzcheevpoegla',
+                user: 'freshcart23@gmail.com',
+                pass: 'fdvdipxxmphvvbla',
             }
         })
         const mailOptions = {
-            from: 'neethus484@gmail.com',
+            from: 'freshcart23@gmail.com',
             to: email,
             subject: 'Verify your email address',
             html: '<p>Hi ' + firstname + ' ' + lastname + ', please click here to <a href="'+process.env.APP_URL+'/user/verify?email=' + email + '""> Verify</a> your email</p>',
