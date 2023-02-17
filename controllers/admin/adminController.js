@@ -115,7 +115,7 @@ const products = async (req, res) => {
 };
 const addProductView = async (req, res) => {
   try {
-    const categories = await Category.find({status:true}).lean();
+    const categories = await Category.find({ status: true }).lean();
     res.render("product/addProduct", {
       title: "Products",
       categories: categories,
@@ -126,20 +126,23 @@ const addProductView = async (req, res) => {
 };
 const addProduct = async (req, res) => {
   try {
-      if(!req.error){
-        req.body.images = req.files.product_images.map(function (obj) {
-          return obj.filename;
-        }) ;
-        if (req.thumbnail_image) {
-          req.body.thumbnail_image = req.thumbnail_image;
-        }
-        req.body.status = 1;
-        const newProduct = await Product.insertMany(req.body);
-        res.redirect("/admin/products");
-      }else{
-        const categories = await Category.find({status:true}).lean();
-        res.render('product/addProduct',{productImgError:"Upload valid image",categories:categories})
+    if (!req.error) {
+      req.body.images = req.files.product_images.map(function (obj) {
+        return obj.filename;
+      });
+      if (req.thumbnail_image) {
+        req.body.thumbnail_image = req.thumbnail_image;
       }
+      req.body.status = 1;
+      const newProduct = await Product.insertMany(req.body);
+      res.redirect("/admin/products");
+    } else {
+      const categories = await Category.find({ status: true }).lean();
+      res.render("product/addProduct", {
+        productImgError: "Upload valid image",
+        categories: categories,
+      });
+    }
   } catch (error) {
     console.log(error.message);
   }
@@ -535,30 +538,35 @@ const topSalesReport = async (req, res) => {
 /* ----------------Sales Report--------------  */
 const salesReport = async (req, res) => {
   try {
-    let fromDate;
-    let toDate;
-    if (req.query) {
-      fromDate = req.query.fromdate;
-      toDate = req.query.todate;
+    let { fromdate, todate } = req?.query ?? {};
+    let salesReport;
+    let total = 0
+
+    if (fromdate && todate) {
+      fromdate = new Date(fromdate);
+      todate = new Date(todate);
+
+      if (req?.query?.fromdate == req?.query?.todate && todate && fromdate)
+        todate.setDate(todate.getDate() + 1);
+
+      salesReport = await Order.find({
+        date: { $gte: fromdate, $lt: todate },
+      }).lean();
+      salesReport.map((item) => {
+        item.date = moment(item.date).format("Do MMMM YYYY");
+      });
+    } else {
+      salesReport = await Order.find({}).limit(10).lean();
+      salesReport.map((item)=>{
+        item.date = moment(item.date).format("Do MMMM YYYY");
+        total = total+item.total_amount
+      })
     }
-    const salesReport = await Order.find({
-      date: {
-        $gte: fromDate?.moment(fromDate).format("YYYY-MM-DD"),
-        $lt: toDate?.moment(toDate).format("YYYY-MM-DD"),
-      },
-    }).lean();
-    console.log(salesReport);
-    salesReport.map((item) => {
-      item.date = moment(item.date).format("Do MMMM YYYY");
-    });
-    const total = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: "$total_amount" } } },
-    ]);
     res.render("sales/sales-report", {
       salesReport: salesReport,
-      total: total[0].total,
-      fromDate: fromDate,
-      toDate: toDate,
+      total: total,
+      fromDate: fromdate,
+      toDate: todate,
     });
   } catch (error) {
     console.log(error);

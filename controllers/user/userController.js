@@ -38,7 +38,10 @@ const userHome = async (req, res) => {
 const showProducts = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   try {
-    const categoryProducts = await Product.find({ category_id: req.params.id,status:true })
+    const categoryProducts = await Product.find({
+      category_id: req.params.id,
+      status: true,
+    })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .lean()
@@ -376,7 +379,7 @@ const updateAddress = async (req, res) => {
       zipCode,
       addrname,
     } = req.body;
-    const id = req.params.id
+    const id = req.params.id;
     const update = await User.updateOne(
       { email: req.session.user, "address.id": req.params.id },
       {
@@ -580,7 +583,7 @@ const checkoutFunc = async (userId, selectedMethod, selectedAdress) => {
 const orders = async (req, res) => {
   const user = await isAuth(req.session.user);
   const ordersList = await Order.find({ userId: user.user._id })
-    .sort({ date:-1 })
+    .sort({ date: -1 })
     .lean();
   let date = moment().format("MMMM Do YYYY, h:mm:ss a");
   ordersList.forEach((item, i) => {
@@ -633,8 +636,11 @@ const orderDetails = async (req, res) => {
       { "address.id": order.addressId },
       { _id: 0, address: { $elemMatch: { id: order.addressId } } }
     ).lean();
-    const subtotal = order.total_amount + order.couponAmount;
-    res.render("orderDetails", {
+    const subtotal = order.couponAmount
+      ? order.total_amount + order.couponAmount
+      : order.total_amount;
+
+      res.render("orderDetails", {
       orderDetails: order,
       products: products,
       orderDate: date,

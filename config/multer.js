@@ -46,12 +46,16 @@ const fileFilter = (req, file, cb) => {
     cb(null, true);
   } else {
     cb(null, false);
-    req.error = 'Type validation failed'
+    req.error = "Type validation failed";
   }
 };
 
 const categoryUpload = multer({ storage: storage });
-const productUpload = multer({ storage: productStorage,fileFilter, limits: { fileSize: 4000000 }, });
+const productUpload = multer({
+  storage: productStorage,
+  fileFilter,
+  limits: { fileSize: 400000 },
+});
 
 module.exports = {
   categoryUpload,
