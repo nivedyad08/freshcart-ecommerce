@@ -238,7 +238,7 @@ monthWiseRevenue.forEach((item)=>{
 //Revenue report
 var options = {
     series: [{
-        name: 'series1',
+        name: 'revenue',
         data: revenueData
     }],
     chart: {
@@ -382,6 +382,41 @@ var options = {
 var chart = new ApexCharts(document.querySelector("#report-chart"), options);
 chart.render();
 
+// sales purchase chart
+var options = {
+    series: [{
+        data: revenueData
+    }],
+    chart: {
+        height: 300,
+        type: 'bar',
+    },
+    colors: ['#0da487', '#2483e2', '#3d3d3d'],
+    plotOptions: {
+        bar: {
+            columnWidth: '10%',
+            distributed: true,
+        }
+    },
+    dataLabels: {
+        enabled: false
+    },
+    legend: {
+        show: false
+    },
+    xaxis: {
+        categories: ['Jan','Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+        labels: {
+            style: {
+                colors: ['#0da487', '#2483e2', '#3d3d3d'],
+                fontSize: '12px'
+            }
+        }
+    }
+};
+
+var chart = new ApexCharts(document.querySelector("#sales-purchase-chart"), options);
+chart.render();
 //Category report
 const categoryData = []
 const categoryReportData = []
@@ -887,6 +922,7 @@ var chartLine = new ApexCharts(
 chartLine.render();
 
 });
+
 
 // window.setInterval(function () {
 //     iteration++;

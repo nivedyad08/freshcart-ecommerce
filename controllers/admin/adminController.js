@@ -369,7 +369,9 @@ const orderDetails = async (req, res) => {
       { "address.id": order.addressId },
       { _id: 0, address: { $elemMatch: { id: order.addressId } } }
     ).lean();
-    const subtotal = order.total_amount + order.couponAmount;
+    const subtotal = order.couponAmount
+      ? order.total_amount + order.couponAmount
+      : order.total_amount;
     res.render("orders/orderDetails", {
       orderDetails: order,
       products: products,
@@ -458,7 +460,7 @@ const createCouponView = async (req, res) => {
     res.render("coupon/addCoupon", {
       categories: categories,
       coupons: coupons,
-      date:date
+      date: date,
     });
   } catch (error) {
     console.log(error);
@@ -542,7 +544,7 @@ const salesReport = async (req, res) => {
   try {
     let { fromdate, todate } = req?.query ?? {};
     let salesReport;
-    let total = 0
+    let total = 0;
 
     if (fromdate && todate) {
       fromdate = new Date(fromdate);
@@ -556,19 +558,20 @@ const salesReport = async (req, res) => {
       }).lean();
       salesReport.map((item) => {
         item.date = moment(item.date).format("Do MMMM YYYY");
+        total = total + item.total_amount;
       });
     } else {
       salesReport = await Order.find({}).limit(10).lean();
-      salesReport.map((item)=>{
+      salesReport.map((item) => {
         item.date = moment(item.date).format("Do MMMM YYYY");
-        total = total+item.total_amount
-      })
+        total = total + item.total_amount;
+      });
     }
     res.render("sales/sales-report", {
       salesReport: salesReport,
       total: total,
-      fromDate: fromdate,
-      toDate: todate,
+      fromDate: req.query.fromdate,
+      toDate: req.query.todate,
     });
   } catch (error) {
     console.log(error);
