@@ -7,9 +7,8 @@ const Invoice = require("../../models/invoiceMdl");
 const isAuth = require("../../helper/isAuth");
 const mathHelper = require("../../helper/mathHelper").createOrderId;
 const moment = require("moment");
-
 /* ----------------Home Page--------------  */
-const userHome = async (req, res) => {
+const userHome = async (req, res, next) => {
   try {
     const user = await isAuth(req.session.user);
     const products = await Product.aggregate([
@@ -31,11 +30,11 @@ const userHome = async (req, res) => {
       products: products,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 /* ----------------showProducts--------------  */
-const showProducts = async (req, res) => {
+const showProducts = async (req, res, next) => {
   const { page = 1, limit = 10 } = req.query;
   try {
     const categoryProducts = await Product.find({
@@ -56,7 +55,7 @@ const showProducts = async (req, res) => {
       // nextPage: nextPage,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
@@ -468,7 +467,7 @@ const orderPlacement = async (req, res) => {
 
 /* ---------------Paypal Integration--------------  */
 const paypalCheckout = async (req, res) => {
-  const userId = req.params.userId
+  const userId = req.params.userId;
   const user = await isAuth(req.session.user);
 
   res.render("paypal-integration", {
@@ -538,8 +537,7 @@ const checkoutFunc = async (userId, selectedMethod, paypalAddress) => {
   }
   const data = {
     userId: userId,
-    userName:
-      userCartDetails?.first_name + " " + userCartDetails?.last_name,
+    userName: userCartDetails?.first_name + " " + userCartDetails?.last_name,
     product: product,
     orderId: orderId,
     coupon: Global_Coupon,
@@ -644,7 +642,7 @@ const orderDetails = async (req, res) => {
       ? order.total_amount + order.couponAmount
       : order.total_amount;
 
-      res.render("orderDetails", {
+    res.render("orderDetails", {
       orderDetails: order,
       products: products,
       orderDate: date,
