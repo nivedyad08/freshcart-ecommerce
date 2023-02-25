@@ -7,16 +7,17 @@ const Coupon = require("../../models/couponMdl");
 const Invoice = require("../../models/invoiceMdl");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
+const { isLogin } = require("../../middleware/userAuth");
 
-const adminLogin = async (req, res) => {
+const adminLogin = async (req, res, next) => {
   try {
     res.render("login", { title: "Fresh Cart - Login", error: "" });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 
-const authenticate = async (req, res) => {
+const authenticate = async (req, res, next) => {
   try {
     let checkUser = await Admin.findOne({ email: req.body.email });
     if (checkUser) {
@@ -29,10 +30,12 @@ const authenticate = async (req, res) => {
     } else {
       res.render("login", { error: "Incorrect Credential !!" });
     }
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
-const adminHome = async (req, res) => {
+const adminHome = async (req, res, next) => {
   try {
     const categories = await Category.find({ status: true }).lean();
     const topProducts = await bestSellingProducts((limit = 3));
@@ -91,7 +94,7 @@ const adminHome = async (req, res) => {
       totalCouponAmount: totalCouponAmount?.[0]?.total,
     });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 //Product
@@ -110,10 +113,10 @@ const products = async (req, res) => {
     ]);
     res.render("product/products", { products: productList });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const addProductView = async (req, res) => {
+const addProductView = async (req, res, next) => {
   try {
     const categories = await Category.find({ status: true }).lean();
     res.render("product/addProduct", {
@@ -121,10 +124,10 @@ const addProductView = async (req, res) => {
       categories: categories,
     });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const addProduct = async (req, res) => {
+const addProduct = async (req, res, next) => {
   try {
     if (!req.error) {
       req.body.images = req.files.product_images.map(function (obj) {
@@ -144,11 +147,11 @@ const addProduct = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 
-const editProductView = async (req, res) => {
+const editProductView = async (req, res, next) => {
   try {
     const productDetails = await Product.findOne({
       _id: req.params.productId,
@@ -160,12 +163,13 @@ const editProductView = async (req, res) => {
       categories: categories,
     });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 
-const editProduct = async (req, res) => {
+const editProduct = async (req, res, next) => {
   try {
+    console.log(req.files.product_images)
     if (req.files.product_images) {
       req.body.images = req.files.product_images.map(function (obj) {
         return obj.filename;
@@ -184,19 +188,21 @@ const editProduct = async (req, res) => {
           price: req.body.price,
           unit: req.body.unit,
           quantity: req.body.quantity,
-          images: req.body.images,
           description: req.body.description,
           thumbnail_image: req.body.thumbnail_image,
+        },
+        $push:{
+          images: {$each:req.body.images ?? []},
         },
       }
     );
     res.redirect("/admin/products");
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 
-const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res, next) => {
   try {
     const product = await Product.findOneAndUpdate(
       { _id: req.params.productId },
@@ -206,8 +212,23 @@ const deleteProduct = async (req, res) => {
     else res.send("error");
   } catch (error) {}
 };
+//Delete product image
+const deleteProductImage = async (req, res, next) => {
+  try {
+    const { productId, filename } = req.query;
+    const productImg = await Product.updateOne(
+      { _id: productId },
+      { $pull: { images: filename } }
+    );
+    if (productImg) {
+      res.json("success");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 //Category
-const categories = async (req, res) => {
+const categories = async (req, res, next) => {
   try {
     const categoryList = await Category.find({ status: true }).lean();
     res.render("category/categories", {
@@ -215,69 +236,80 @@ const categories = async (req, res) => {
       category: categoryList,
     });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const addCategoryView = async (req, res) => {
+const addCategoryView = async (req, res, next) => {
   try {
     res.render("category/addCategory", { error: "" });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const addCategory = async (req, res) => {
+const addCategory = async (req, res, next) => {
   try {
-    const category = await Category.findOne({
-      name: { $regex: `${req.body.name}.*`, $options: "i" },
-    });
-    if (!category) {
-      req.body.image = req.file.filename;
-      req.body.status = 1;
-      const newCategory = await Category.insertMany(req.body);
-      res.redirect("/admin/categories");
+    if (!req.error) {
+      const category = await Category.findOne({
+        name: { $regex: `${req.body.name}.*`, $options: "i" },
+      });
+      if (!category) {
+        req.body.image = req.file.filename;
+        req.body.status = 1;
+        const newCategory = await Category.insertMany(req.body);
+        res.redirect("/admin/categories");
+      } else {
+        res.render("category/addCategory", { error: "Category already taken" });
+      }
     } else {
-      res.render("category/addCategory", { error: "Category already taken" });
+      res.render("category/addCategory", {
+        error: "Upload valid image",
+      });
     }
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const categoryDetails = async (req, res) => {
+const categoryDetails = async (req, res, next) => {
   try {
     const categoryDetails = await Category.findOne({
       _id: req.params.categoryId,
     });
     res.send(categoryDetails);
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const editCategory = async (req, res) => {
+const editCategory = async (req, res, next) => {
   try {
-    let imageName = "";
-    if (req.file) {
-      imageName = req.file.filename;
-    } else {
-      imageName = req.body.image;
-    }
-    let updateCategory = await Category.updateOne(
-      { _id: req.body.categoryId },
-      {
-        $set: {
-          name: req.body.name,
-          image: imageName,
-          offer: req.body.offer,
-        },
+    if (!req.error) {
+      let imageName = "";
+      if (req.file) {
+        imageName = req.file.filename;
+      } else {
+        imageName = req.body.image;
       }
-    );
-    if (updateCategory) {
-      res.redirect("/admin/categories");
+      let updateCategory = await Category.updateOne(
+        { _id: req.body.categoryId },
+        {
+          $set: {
+            name: req.body.name,
+            image: imageName,
+            offer: req.body.offer,
+          },
+        }
+      );
+      if (updateCategory) {
+        res.json("success");
+      }
+    } else {
+      res.json("error");
+      // res.render("categories",{error:"Upload valid image !!"})
     }
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res, next) => {
   try {
     const deleteCategory = await Category.findOneAndUpdate(
       { _id: req.params.categoryId },
@@ -286,26 +318,26 @@ const deleteCategory = async (req, res) => {
     if (deleteCategory) res.send("success");
     else res.send("error");
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 //User
-const users = async (req, res) => {
+const users = async (req, res, next) => {
   try {
     const usersList = await User.find({}).lean();
     res.render("user/users", { users: usersList });
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const addUserView = async (req, res) => {
+const addUserView = async (req, res, next) => {
   try {
     res.render("user/addUser");
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const verifyUser = async (req, res) => {
+const verifyUser = async (req, res, next) => {
   try {
     const user = await User.findOneAndUpdate(
       { _id: req.params.userId },
@@ -314,10 +346,10 @@ const verifyUser = async (req, res) => {
     if (user) res.send("success");
     else res.send("error");
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const blockUser = async (req, res) => {
+const blockUser = async (req, res, next) => {
   try {
     const userInfo = await User.findOne({ _id: req.params.userId }).then(
       async (data, err) => {
@@ -326,6 +358,7 @@ const blockUser = async (req, res) => {
             { _id: req.params.userId },
             { $set: { status: false } }
           );
+          delete req.session.user;
         } else {
           const user = await User.findOneAndUpdate(
             { _id: req.params.userId },
@@ -336,10 +369,10 @@ const blockUser = async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     const product = Product.findOneAndUpdate(
       { _id: userId },
@@ -349,18 +382,18 @@ const deleteUser = async (req, res) => {
 };
 
 /* ----------------Order--------------  */
-const ordersList = async (req, res) => {
+const ordersList = async (req, res, next) => {
   const ordersList = await Order.find({}).lean();
   ordersList.forEach((item, i) => {
-    item.status == "Cancelled" ? (item.cancelStatus = "yes") : "";
+    item.cancelStatus =
+      item.status == "Cancelled" || item.status == "Delivered" ? "yes" : "";
     item.date = moment(item.date).format("Do MMM YYYY");
   });
-
   res.render("orders/order", { title: "Orders", ordersList: ordersList });
 };
 
 /* ----------------Order Details--------------  */
-const orderDetails = async (req, res) => {
+const orderDetails = async (req, res, next) => {
   try {
     const order = await Order.findOne({ _id: req.params.id }).lean();
     const date = moment(order.date).format("MMMM Do YYYY, h:mm a");
@@ -385,7 +418,7 @@ const orderDetails = async (req, res) => {
 };
 
 /* ----------------Cancel Order--------------  */
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req, res, next) => {
   const cancelOrder = await Order.findOneAndUpdate(
     { _id: req.params.id },
     { $set: { status: "Cancelled" } },
@@ -407,7 +440,7 @@ const cancelOrder = async (req, res) => {
   } else res.json("error");
 };
 //Order Status chage
-const changeOrderStatus = async (req, res) => {
+const changeOrderStatus = async (req, res, next) => {
   try {
     const updateStatus = await Order.findOneAndUpdate(
       { _id: req.params.id },
@@ -429,7 +462,7 @@ const changeOrderStatus = async (req, res) => {
   }
 };
 //Coupon
-const listCoupons = async (req, res) => {
+const listCoupons = async (req, res, next) => {
   try {
     const coupons = await Coupon.aggregate([
       {
@@ -452,7 +485,7 @@ const listCoupons = async (req, res) => {
   }
 };
 //Create Coupon view
-const createCouponView = async (req, res) => {
+const createCouponView = async (req, res, next) => {
   try {
     const categories = await Category.find({ status: true }).lean();
     const coupons = await Coupon.find().lean();
@@ -467,7 +500,7 @@ const createCouponView = async (req, res) => {
   }
 };
 /* ----------------Create Coupon--------------  */
-const createCoupon = async (req, res) => {
+const createCoupon = async (req, res, next) => {
   try {
     const checkCouponCode = await Coupon.find({ code: req.body.code });
     if (checkCouponCode.length == 0) {
@@ -485,7 +518,7 @@ const createCoupon = async (req, res) => {
   }
 };
 //Activate/deactivate coupon
-const activateCoupon = async (req, res) => {
+const activateCoupon = async (req, res, next) => {
   try {
     const updateCouponStatus = await Coupon.findById(req.params.id);
     if (updateCouponStatus.status == true) {
@@ -499,7 +532,7 @@ const activateCoupon = async (req, res) => {
   }
 };
 //Edit Coupon
-const editCoupon = async (req, res) => {
+const editCoupon = async (req, res, next) => {
   try {
     const editCoupon = await Coupon.findById(req.params.id).lean();
     if (editCoupon) {
@@ -510,7 +543,7 @@ const editCoupon = async (req, res) => {
   }
 };
 //Update Coupon
-const updateCoupon = async (req, res) => {
+const updateCoupon = async (req, res, next) => {
   try {
     req.body.data.status
       ? (req.body.data.status = true)
@@ -528,7 +561,7 @@ const updateCoupon = async (req, res) => {
 };
 
 /* ----------------Top Sales Report--------------  */
-const topSalesReport = async (req, res) => {
+const topSalesReport = async (req, res, next) => {
   try {
     const topProductsReport = await bestSellingProducts();
     res.render("sales/top-sales-report", {
@@ -540,7 +573,7 @@ const topSalesReport = async (req, res) => {
 };
 
 /* ----------------Sales Report--------------  */
-const salesReport = async (req, res) => {
+const salesReport = async (req, res, next) => {
   try {
     let { fromdate, todate } = req?.query ?? {};
     let salesReport;
@@ -578,7 +611,7 @@ const salesReport = async (req, res) => {
   }
 };
 /* ----------------Revenue Report--------------  */
-const revenueReport = async (req, res) => {
+const revenueReport = async (req, res, next) => {
   try {
     const monthWiseRevenue = await Order.aggregate([
       { $match: { status: "Delivered" } },
@@ -670,14 +703,9 @@ const bestSellingProducts = async (limit = 10) => {
 const logout = async (req, res, next) => {
   try {
     delete req.session.admin;
-    console.log("The session has been destroyed!");
-
-    // req.session.admin.destroy(() => {
-    //   console.log("session destroyed");
-    // });
     res.redirect("/admin/login");
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 
@@ -690,6 +718,7 @@ module.exports = {
   addProduct,
   editProduct,
   deleteProduct,
+  deleteProductImage,
   categories,
   addCategoryView,
   addCategory,

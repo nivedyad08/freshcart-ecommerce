@@ -1,12 +1,12 @@
 const path = require("path");
 const multer = require("multer");
-const { log } = require("console");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../public/admin/images/category"));
   },
   filename: function (req, file, cb) {
+    console.log(file)
     const name = Date.now() + "-" + file.originalname;
     cb(null, name);
   },
@@ -40,7 +40,7 @@ const fileFilter = (req, file, cb) => {
     "image/gif",
   ];
   if (
-    array_of_allowed_files.includes(file_extension) ||
+    array_of_allowed_files.includes(file_extension) &&
     array_of_allowed_file_types.includes(file.mimetype)
   ) {
     cb(null, true);
@@ -50,7 +50,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const categoryUpload = multer({ storage: storage });
+const categoryUpload = multer({ storage: storage,fileFilter });
 const productUpload = multer({
   storage: productStorage,
   fileFilter,

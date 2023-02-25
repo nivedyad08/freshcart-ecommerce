@@ -5,8 +5,6 @@ const session = require('../config/session')
 authRoute.use(session)
 const hbs = require('express-handlebars')
 //importing layouts
-// const importLayout  = require('../config/layouts')
-// authRoute.importLayout
 authRoute.engine('hbs', hbs.engine({
   extname: 'hbs',
   defaultLayout: 'user-layout',
@@ -29,6 +27,5 @@ authRoute.post('/update/password', authCheck.isLogin ,loginController.updatePass
 //Sign In
 authRoute.get('/signin', authCheck.isLogin, loginController.signin)
 authRoute.post('/signin', loginController.authenticate)
-
 
 module.exports = authRoute

@@ -28,16 +28,9 @@
             <!-- nav -->
             {{#each categories}}
               <ul class="nav nav-category" id="categoryCollapseMenu">
-                <li class="nav-item border-bottom w-100 collapsed" data-bs-toggle="collapse"
-                  data-bs-target="#categoryFlushOne" aria-expanded="false" aria-controls="categoryFlushOne"><a href="#"
+                <li class="nav-item border-bottom w-100">
+                  <a href="/category/{{name}}/{{_id}}"
                     class="nav-link">{{name}} <i class="feather-icon icon-chevron-right"></i></a>
-                  <!-- accordion collapse -->
-                  <div id="categoryFlushOne" class="accordion-collapse collapse"
-                    data-bs-parent="#categoryCollapseMenu">
-                    <div>
-                    </div>
-                  </div>
-
                 </li>
               </ul>
             {{/each}}
@@ -49,7 +42,7 @@
             <div class="position-absolute p-5 py-8">
               <h3 class="mb-0">Fresh Fruits </h3>
               <p>Get Upto 25% Off</p>
-              <a href="#" class="btn btn-dark">Shop Now<i class="feather-icon icon-arrow-right ms-1"></i></a>
+              <a href="#" class="btn btn-dark no-cursor">Shop Now<i class="feather-icon icon-arrow-right ms-1"></i></a>
             </div>
             <!-- Banner Content -->
             <!-- Banner Image -->
@@ -61,11 +54,24 @@
         </aside>
         <section class="col-lg-9 col-md-12">
           <!-- list icon -->
-          <div class="d-lg-flex justify-content-between align-items-center">
-            <div class="mb-3 mb-lg-0">
-            </div>
-          
+          {{#if error}}
+            <div class="d-lg-flex justify-content-between align-items-center">
+              <div class="card shadow-lg border-0 rounded-lg mt-5 mx-auto" style="width: 100rem;">
+                  <h6 class="card-header display-5 text-muted text-center">
+                      Oops !!
+                  </h6>
+
+                  <span class="card-subtitle mb-2 mt-4 text-muted text-center">
+                      No Product Found 
+                  </span>
+
+                  <div class="card-body mx-auto">
+                      <a type="button" href="/"
+                      class="btn btn-sm btn-info text-white"> Back To Home </a>
+                  </div>
+              </div>
           </div>
+          {{/if}}
           <!-- row -->
           <div class="row g-4 row-cols-xl-3 row-cols-lg-3 row-cols-2 row-cols-md-2 mt-2">
 

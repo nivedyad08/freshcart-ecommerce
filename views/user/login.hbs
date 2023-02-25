@@ -73,6 +73,10 @@
       console.log(res)
       if(res.message == 'success'){
         document.location.href="/user/reset-password-otp/"+res.id
+      }else if(res.message == 'error'){
+        document.getElementById('restPasswordError').innerText = 'Email does not exists !!!'
+      }else{
+        document.getElementById('restPasswordError').innerText = 'Something went wrong'
       }
     }else{
       document.getElementById('restPasswordError').innerText = 'Please enter the email id to rest the password'

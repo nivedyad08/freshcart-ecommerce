@@ -56,8 +56,8 @@
                     <!-- input -->
                 {{#if quantity}}
                     <div class="input-group input-spinner" onclick="getQuantity()" >
-                        <input type="button"  value="-" class="button-minus  btn  btn-sm " data-field="quantity">
-                        <input type="number" step="1" min="1" max="{{quantity}}" value="1" name="quantity" id="quantity" class="quantity-field form-control-sm form-input">
+                        <input type="button" id="button-minus"  value="-" class="button-minus  btn  btn-sm " data-field="quantity">
+                        <input type="number" step="1" min="1" max="{{quantity}}" value="1" name="quantity" id="quantity" class="quantity-field form-control-sm form-input" disabled>
                         <input type="button" value="+" id="button-plus" class="button-plus btn btn-sm " data-field="quantity">
                     </div>
                     <div class="mt-3 row justify-content-start g-2 align-items-center">
@@ -69,10 +69,7 @@
                         {{#if error}}
                              <span id = "message" style="color:red">{{error}} </span> <br><br>  
                         {{/if}}
-                        <div class="col-md-4 col-4">
-                            <!-- btn -->
-                            <a class="btn btn-light " href="#" data-bs-toggle="tooltip" data-bs-html="true" aria-label="Wishlist"><i class="feather-icon icon-heart"></i></a>
-                        </div>
+                        <span id = "userError-message" style="color:red"></span> <br><br>  
                     </div>
                 {{else}}
                     <div class="alert alert-warning" role="alert">
@@ -124,7 +121,8 @@
   </style>
 
   <script>
-    function getQuantity(value){
+    function getQuantity(){
+        document.getElementById('userError-message').innerText = ""
         let max_value   = $('#quantity').attr('max')
         let quantity    = document.getElementById('quantity').value
         var incrementor = document.getElementById('button-plus')
@@ -134,9 +132,9 @@
             incrementor.removeAttribute("disabled");
         }
         var decrementor = document.getElementById('button-minus')
-        if(quantity == 0){
+        if(quantity == 1){
             decrementor.setAttribute("disabled", true);
-        }else if(quantity<0){
+        }else if(quantity>0){
             decrementor.removeAttribute("disabled");
         }
     }
@@ -152,14 +150,17 @@
                 return request.setRequestHeader('X-CSRF-Token', $("meta[name='csrf-token']").attr('content'));
             },
             success :function(response){
+                console.log(response)
                 if(response == 'success'){
                     window.location.reload();
-                }else{
+                }else if(response == 'error'){
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
                         text: 'Please signin to add the item to the cart!',
                     })
+                }else if(response == 'userError'){
+                    document.getElementById('userError-message').innerText = "Quantity must be greater than zero"
                 }
             }
         })

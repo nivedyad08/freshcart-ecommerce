@@ -4,3 +4,16 @@ body{
 .card-product {
     height: 96% !important;
 }
+.dropdown-toggle.home:after{
+    content :none !important;
+}
+.no-cursor{
+    cursor: none !important;
+    list-style-type: none; 
+}
+.category-nav li{
+   display: inline !important; 
+}
+.category-separation{
+    margin-right: 10px;
+}

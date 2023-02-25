@@ -2,7 +2,6 @@ const express = require("express");
 const userRoute = express();
 const authCheck = require("../middleware/userAuth");
 const session = require("../config/session");
-const { errorHandler } = require("../config/errorhandler");
 userRoute.use(session);
 //importing layouts
 const hbs = require("express-handlebars");
@@ -20,8 +19,8 @@ userRoute.set("views", "./views/user");
 const userController = require("../controllers/user/userController");
 
 //User Home
-userRoute.get("/", userController.userHome, errorHandler);
-//product details
+userRoute.get("/", userController.userHome);
+//Product details
 userRoute.get(
   "/product/:productName/:productId",
   userController.productDetails
@@ -115,4 +114,5 @@ userRoute.put(
   authCheck.isUser,
   userController.invoice
 );
+
 module.exports = userRoute;

@@ -1,5 +1,6 @@
 const User = require("../models/userMdl");
 const Category = require("../models/categoryMdl");
+const Product = require("../models/productMdl");
 
 module.exports = async (sessionid) => {
   let isLogged = false;
@@ -12,6 +13,7 @@ module.exports = async (sessionid) => {
   ).lean();
 
   const categories = await Category.find({ status: true }).lean();
+  const products = await Product.find({ status: true }).lean();
   const cartCount = await User.aggregate([
     { $match: { email: sessionid } },
     { $project: { _id: 0, count: { $size: "$cart" } } },
@@ -22,5 +24,6 @@ module.exports = async (sessionid) => {
     categories,
     cartCount,
     isLogged,
+    products,
   };
 };

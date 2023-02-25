@@ -21,12 +21,12 @@ const sendEMailVerification = async (firstname, lastname, email, userid) => {
             secure: false,
             requireTLS: true,
             auth: {
-                user: 'freshcart23@gmail.com',
-                pass: 'fdvdipxxmphvvbla',
+                user: 'cartzillabangalore@gmail.com',
+                pass: 'utehlwpnrjtmiems',
             }
         })
         const mailOptions = {
-            from: 'freshcart23@gmail.com',
+            from: 'cartzillabangalore@gmail.com',
             to: email,
             subject: 'Verify your email address',
             html: '<p>Hi ' + firstname + ' ' + lastname + ', please click here to <a href="'+process.env.APP_URL+'/user/verify?email=' + email + '""> Verify</a> your email</p>',
@@ -89,7 +89,7 @@ const signin = async (req, res) => {
         if(req.session.user){
             isLogged = true
         }
-        res.render('login', { title: 'Fresh Cart- Sign In', message: '',checkUser:isLogged })
+        res.render('login', { title: 'Fresh Cart- Sign In', message: '',checkUser:isLogged,err:"" })
     } catch (error) {
         console.log(error.message);
     }
@@ -120,21 +120,23 @@ const authenticate = async (req, res) => {
 const sendOtp = async(req,res)=>{
     try {
         const userPhone = await User.find({email:req.body.email},{phone:1})
-        const phone ='+91'+userPhone[0].phone
-        const OTP = twilio.generateOTP();
-        const client = twilio.client
-        client.messages.create({
-            body:OTP,
-            to: phone,
-            from: '+18575242437'
-         }).then(async()=>{
-            console.log(9888);
-            message => console.log(`Message SID ${message.sid}`)
-            const user = await User.findOneAndUpdate({email:req.body.email},{$set:{token:OTP}})
-            console.log(user);
-            res.json({message:'success',id:userPhone[0].id})
-         }) .catch(error => console.log(error))
-          
+        if(userPhone.length>0){
+            const phone ='+91'+userPhone[0].phone
+            const OTP = twilio.generateOTP();
+            const client = twilio.client
+            client.messages.create({
+                body:OTP,
+                to: phone,
+                from: '+18575242437'
+            }).then(async()=>{
+                message => console.log(`Message SID ${message.sid}`)
+                const user = await User.findOneAndUpdate({email:req.body.email},{$set:{token:OTP}})
+                console.log(user);
+                res.json({message:'success',id:userPhone[0].id})
+            }) .catch(error => console.log(error))
+        }else{
+            res.json("error")
+        }
     } catch (error) {
         console.log(error);
     }

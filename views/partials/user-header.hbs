@@ -26,7 +26,7 @@
               <div class="list-inline me-2">
                 <div class="list-inline-item">
 
-                  <a href="#!" class="text-muted" data-bs-toggle="modal" data-bs-target="#userModal">
+                  <a href="/account-settings" class="text-muted">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                       class="feather feather-user">
@@ -81,13 +81,6 @@
               </div>
             </form>
         </div>
-        <div class="col-md-2 col-xxl-2 d-none d-lg-block">
-          <!-- Button trigger modal -->
-          <button type="button" class="btn  btn-outline-gray-400 text-muted" data-bs-toggle="modal"
-            data-bs-target="#locationModal">
-            <i class="feather-icon icon-map-pin me-2"></i>Location
-          </button>
-        </div>
         {{#if headerData.user}}
         <div class="col-md-2 row align-items-center">
           {{#with headerData.user}}
@@ -107,22 +100,22 @@
           <div class="list-inline">
             <div class="list-inline-item">
               <a href="pages/shop-wishlist.html" class="text-muted position-relative">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                {{!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                   class="feather feather-heart">
                   <path
                     d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
                   </path>
-                </svg>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                </svg> --}}
+                {{!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
                   5
                   <span class="visually-hidden">unread messages</span>
-                </span>
+                </span> --}}
               </a>
             </div>
             <div class="list-inline-item">
 
-              <a href="#!" class="text-muted" data-bs-toggle="dropdown" aria-expanded="false">
+              <a href="/account-settings" class="text-muted">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                   class="feather feather-user">
@@ -178,14 +171,9 @@
             </svg></span> All Departments
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Dairy, Bread & Eggs</a></li>
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Snacks & Munchies</a></li>
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Fruits & Vegetables</a></li>
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Cold Drinks & Juices</a></li>
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Breakfast & Instant Food</a></li>
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Bakery & Biscuits</a></li>
-
-          <li><a class="dropdown-item" href="pages/shop-grid.html">Chicken, Meat & Fish</a></li>
+          {{#each categories}}
+            <li><a class="dropdown-item" href="/category/{{name}}/{{_id}}">{{name}}</a></li>
+          {{/each}}
         </ul>
       </div>
       <div class="offcanvas offcanvas-start p-4 p-lg-0" id="navbar-default">
@@ -214,56 +202,12 @@
             </div>
           </div>
         </div>
-
-        <div class="d-lg-none d-block mb-3">
-          <button type="button" class="btn  btn-outline-gray-400 text-muted w-100 " data-bs-toggle="modal"
-            data-bs-target="#locationModal">
-            <i class="feather-icon icon-map-pin me-2"></i>Pick Location
-          </button>
-        </div>
         <div class="d-none d-lg-block">
           <ul class="navbar-nav ">
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="/" role="button" data-bs-toggle="dropdown"
+              <a class="nav-link home" href="/" role="button"
                 aria-expanded="false">
                 Home
-              </a>
-            </li>
-            {{!-- <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Shop
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="pages/shop-grid.html">Shop Grid - Filter</a></li>
-                <li><a class="dropdown-item" href="pages/shop-grid-3-column.html">Shop Grid - 3 column</a>
-                </li>
-                <li><a class="dropdown-item" href="pages/shop-list.html">Shop List - Filter</a></li>
-                <li><a class="dropdown-item" href="pages/shop-filter.html">Shop - Filter</a></li>
-                <li><a class="dropdown-item" href="pages/shop-fullwidth.html">Shop Wide</a></li>
-                <li><a class="dropdown-item" href="pages/shop-single.html">Shop Single</a></li>
-                <li><a class="dropdown-item" href="pages/shop-wishlist.html">Shop Wishlist</a></li>
-                <li><a class="dropdown-item" href="pages/shop-cart.html">Shop Cart</a></li>
-                <li><a class="dropdown-item" href="pages/shop-checkout.html">Shop Checkout</a></li>
-              </ul>
-            </li> --}}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Stores
-              </a>
-              {{!-- <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="pages/store-list.html">Store List</a></li>
-                <li><a class="dropdown-item" href="pages/store-grid.html">Store Grid</a></li>
-                <li><a class="dropdown-item" href="pages/store-single.html">Store Single</a></li>
-
-              </ul> --}}
-            </li>
-
-            <li class="nav-item dropdown dropdown-fullwidth">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Mega Sale
               </a>
             </li>
             <li class="nav-item dropdown">
@@ -272,8 +216,6 @@
                 Account
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="pages/signup.html">Signup</a></li>
-                <li><a class="dropdown-item" href="/user/signin">Forgot Password</a></li>
                 <li class="dropdown-submenu dropend">
                   <a class="dropdown-item dropdown-list-group-item dropdown-toggle" href="#">
                     My Account
@@ -293,7 +235,7 @@
         <div class="d-block d-lg-none">
           <ul class="navbar-nav ">
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+              <a class="nav-link dropdown-toggle" href="/" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 Home
               </a>
@@ -304,9 +246,6 @@
                 Account
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/user/signin">Sign in</a></li>
-                <li><a class="dropdown-item" href="/user/signup">Signup</a></li>
-                <li><a class="dropdown-item" href="/user/signin">Forgot Password</a></li>
                 <li class="dropdown-submenu dropend">
                   <a class="dropdown-item dropdown-list-group-item dropdown-toggle" href="#">
                     My Account
@@ -322,25 +261,6 @@
                   </ul>
                 </li>
               </ul>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Shop
-              </a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Stores
-              </a>
-            </li>
-
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Mega Sale
-              </a>
             </li>
           </ul>
         </div>

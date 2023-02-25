@@ -10,16 +10,28 @@
           <div class="card mb-4 bg-light border-0">
             <!-- card body -->
             <div class=" card-body p-9">
-              {{!-- <h2 class="mb-0 fs-1">{{categoryName}}</h2> --}}
+              <h2 class="mb-0 fs-1">{{category}}</h2>
             </div>
           </div>
           <!-- list icon -->
-          <div class="d-lg-flex justify-content-between align-items-center">
-            <div class="mb-3 mb-lg-0">
-              {{!-- <p class="mb-0"> <span class="text-dark">{{totalProducts}}</span> Products found </p> --}}
-            </div>
-            </div>
+          {{#if error}}
+            <div class="d-lg-flex justify-content-between align-items-center">
+              <div class="card shadow-lg border-0 rounded-lg mt-5 mx-auto" style="width: 100rem;">
+                  <h6 class="card-header display-5 text-muted text-center">
+                      Oops !!
+                  </h6>
+
+                  <span class="card-subtitle mb-2 mt-4 text-muted text-center">
+                      No Product Found 
+                  </span>
+
+                  <div class="card-body mx-auto">
+                      <a type="button" href="/"
+                      class="btn btn-sm btn-info text-white"> Back To Home </a>
+                  </div>
+              </div>
           </div>
+          {{/if}}
           <!-- row -->
           <div class="row g-4 row-cols-xl-4 row-cols-lg-3 row-cols-2 row-cols-md-2 mt-2">
             {{#each categoryProducts}}
@@ -47,7 +59,7 @@
           <div class="row mt-8">
             <div class="col">
                      <!-- nav -->
-              <nav>
+              {{!-- <nav>
                 <ul class="pagination">
                   <li class="page-item disabled">
                     <a class="page-link  mx-1 rounded-3 " href="#" aria-label="Previous">
@@ -55,17 +67,12 @@
                     </a>
                   </li>
                   <li class="page-item "><a class="page-link  mx-1 rounded-3 active" href="">{{currentPage}}</a></li>
-                  {{!-- <li class="page-item"><a class="page-link mx-1 rounded-3 text-body" href="#">2</a></li>
-
-                  <li class="page-item"><a class="page-link mx-1 rounded-3 text-body" href="#">...</a></li>
-                  <li class="page-item"><a class="page-link mx-1 rounded-3 text-body" href="#">12</a></li>
-                  <li class="page-item"> --}}
-                    <a class="page-link mx-1 rounded-3 text-body"  href="/category/Fruits/63cf72e100c8cc3bdeac2f98?page={{nextPage}}" aria-label="Next">
+                    <a class="page-link mx-1 rounded-3 text-body"  href="?page={{nextPage}}&limit=3" aria-label="Next">
                       <i class="feather-icon icon-chevron-right"></i>
                     </a>
                   </li>
                 </ul>
-              </nav>
+              </nav> --}}
             </div>
           </div>
         </section>

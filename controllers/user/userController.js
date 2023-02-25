@@ -35,104 +35,144 @@ const userHome = async (req, res, next) => {
 };
 /* ----------------showProducts--------------  */
 const showProducts = async (req, res, next) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { name, id } = req.params;
   try {
     const categoryProducts = await Product.find({
-      category_id: req.params.id,
+      category_id: id,
       status: true,
     })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
       .lean()
-      .exec();
-
+    const categoryName = await Category.findOne(
+      {
+        _id: id,
+        status: true,
+      },
+      { _id: 0, name: 1 }
+    );
     const count = await Product.countDocuments();
-    const nextPage = parseInt(page + 1);
-    res.render("products", {
-      categoryProducts: categoryProducts,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      // nextPage: nextPage,
-    });
+    const user = await isAuth(req.session.user);
+    
+    if (categoryProducts.length > 0 && categoryName.name == name) {
+      res.render("products", {
+        categoryProducts: categoryProducts,
+        category: categoryName.name,
+        headerData: user,
+        categories: user.categories,
+      });
+    } else {
+      res.render("products", {
+        error: "No products found !!!",
+        category: categoryName.name,
+        headerData: user,
+        categories: user.categories,
+      });
+    }
   } catch (error) {
     next(error);
   }
 };
 
 /* ----------------Search Products--------------  */
-const searchProducts = async (req, res) => {
+const searchProducts = async (req, res, next) => {
   try {
-    const search = req.body.search;
+    const { search } = req.body;
     const getProduct = await Product.find({
       status: { $ne: false },
       name: { $regex: `${search}.*`, $options: "i" },
     }).lean();
     const categories = await Category.find({ status: true }).lean();
-    res.render("product-search", {
-      products: getProduct,
-      categories: categories,
-    });
+    if (getProduct.length > 0) {
+      res.render("product-search", {
+        products: getProduct,
+        categories: categories,
+        error: false,
+      });
+    } else {
+      res.render("product-search", {
+        error: true,
+        categories: categories,
+      });
+    }
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Product Details--------------  */
-const productDetails = async (req, res) => {
-  const products = await Product.aggregate([
-    { $match: { name: req.params.productName } },
-    {
-      $lookup: {
-        from: "categories",
-        localField: "category_id",
-        foreignField: "_id",
-        as: "category",
+const productDetails = async (req, res, next) => {
+  try {
+    const { productName, productId } = req.params;
+    const products = await Product.aggregate([
+      { $match: { name: productName } },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category_id",
+          foreignField: "_id",
+          as: "category",
+        },
       },
-    },
-  ]);
-  const user = await isAuth(req.session.user);
-  res.render("productDetails", {
-    title: "Fresh Cart- Product Deatails",
-    categories: user.categories,
-    headerData: user,
-    cartCount: user.cartCount,
-    products: products,
-  });
+    ]);
+    if (products.length > 0) {
+      const user = await isAuth(req.session.user);
+      res.render("productDetails", {
+        title: "Fresh Cart- Product Deatails",
+        categories: user.categories,
+        allProducts: user.products,
+        headerData: user,
+        cartCount: user.cartCount,
+        products: products,
+      });
+    } else {
+      res.redirect("/user/404");
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 /* ----------------Add to Cart--------------  */
-const addToCart = async (req, res) => {
-  if (req.session.user) {
-    const userCartProduct = await User.findOne({
-      email: req.session.user,
-      cart: { $elemMatch: { productId: req.params.productId } },
-    });
-    if (userCartProduct) {
-      const updateUserCart = await User.updateOne(
-        {
-          email: req.session.user,
-          cart: { $elemMatch: { productId: req.params.productId } },
-        },
-        { $inc: { "cart.$.quantity": Number(req.body.quantity) } }
-      );
-    } else {
-      const addProductToCart = await User.updateOne(
-        {
-          email: req.session.user,
-        },
-        {
-          $push: {
-            cart: {
-              productId: req.params.productId,
-              quantity: req.body.quantity,
-            },
+const addToCart = async (req, res, next) => {
+  try {
+    const { productName, productId } = req.params;
+  if (req.body.quantity > 0) {
+    if (req.session.user) {
+      const userCartProduct = await User.findOne({
+        email: req.session.user,
+        cart: { $elemMatch: { productId: productId } },
+      });
+      if (userCartProduct) {
+        const updateUserCart = await User.updateOne(
+          {
+            email: req.session.user,
+            cart: { $elemMatch: { productId: productId } },
           },
-        }
-      );
+          { $inc: { "cart.$.quantity": Number(req.body.quantity) } }
+        );
+      } else {
+        const addProductToCart = await User.updateOne(
+          {
+            email: req.session.user,
+          },
+          {
+            $push: {
+              cart: {
+                productId: productId,
+                quantity: req.body.quantity,
+              },
+            },
+          }
+        );
+      }
+      res.send("success");
+    } else {
+      res.send("error");
     }
-    res.send("success");
   } else {
-    res.send("error");
+    res.send("userError");
+  }
+  } catch (error) {
+    next(error)
   }
 };
 
@@ -170,12 +210,12 @@ const cartItems = async (sessionId) => {
     };
     return cartItems;
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 };
 
 /* ----------------Show Cart--------------  */
-const showCart = async (req, res) => {
+const showCart = async (req, res, next) => {
   try {
     const getCartItems = await cartItems(req.session.user);
     const user = await isAuth(req.session.user);
@@ -187,12 +227,12 @@ const showCart = async (req, res) => {
       totalCartSum: getCartItems.total,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Remove item from cart--------------  */
-const removeItem = async (req, res) => {
+const removeItem = async (req, res, next) => {
   try {
     const result = await User.findOneAndUpdate(
       { email: req.session.user },
@@ -207,12 +247,12 @@ const removeItem = async (req, res) => {
       res.json("success");
     }
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Update cart Quantity--------------  */
-const updateCart = async (req, res) => {
+const updateCart = async (req, res, next) => {
   try {
     const updateCart = await User.updateOne(
       {
@@ -225,12 +265,12 @@ const updateCart = async (req, res) => {
     );
     res.json("success");
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Profile--------------  */
-const accountSettings = async (req, res) => {
+const accountSettings = async (req, res, next) => {
   try {
     const user = await isAuth(req.session.user);
     res.render("account-settings", {
@@ -241,11 +281,11 @@ const accountSettings = async (req, res) => {
       message: "",
     });
   } catch {
-    console.log(error);
+    next(error);
   }
 };
 
-const updateAccountSettings = async (req, res) => {
+const updateAccountSettings = async (req, res, next) => {
   try {
     const { first_name, last_name, phone, email } = req.body;
     const updateDetails = await User.findOneAndUpdate(
@@ -268,11 +308,11 @@ const updateAccountSettings = async (req, res) => {
         accountSettings: true,
       });
   } catch {
-    console.log(error);
+    next(error);
   }
 };
 
-const deleteAccount = async (req, res) => {
+const deleteAccount = async (req, res, next) => {
   const deleteUser = await User.dropUser("req.params.email");
   if (deleteAccount) {
     delete req.session.user;
@@ -281,21 +321,25 @@ const deleteAccount = async (req, res) => {
 };
 
 /* ----------------Address--------------  */
-const accountAddresses = async (req, res) => {
-  const user = await isAuth(req.session.user);
-  const address = await User.find({ email: req.session.user }).lean();
+const accountAddresses = async (req, res, next) => {
+  try {
+    const user = await isAuth(req.session.user);
+    const address = await User.find({ email: req.session.user }).lean();
 
-  res.render("address", {
-    address: true,
-    categories: user.categories,
-    headerData: user,
-    cartCount: user.cartCount,
-    userAddress: address?.[0]?.address,
-  });
+    res.render("address", {
+      address: true,
+      categories: user.categories,
+      headerData: user,
+      cartCount: user.cartCount,
+      userAddress: address?.[0]?.address,
+    });
+  } catch (error) {
+    next(error)
+  }
 };
 
 /* ----------------Add address--------------  */
-const addAddress = async (req, res) => {
+const addAddress = async (req, res, next) => {
   try {
     const {
       firstName,
@@ -331,12 +375,12 @@ const addAddress = async (req, res) => {
     );
     res.redirect("/account-address");
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Delete address--------------  */
-const deleteAddress = async (req, res) => {
+const deleteAddress = async (req, res, next) => {
   try {
     const deleteAddress = await User.updateOne(
       {
@@ -351,12 +395,12 @@ const deleteAddress = async (req, res) => {
     );
     if (deleteAddress) res.json("success");
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Edit Address--------------  */
-const editAddress = async (req, res) => {
+const editAddress = async (req, res, next) => {
   const address = await User.find(
     { "address.id": req.params.id },
     { _id: 0, address: { $elemMatch: { id: req.params.id } } }
@@ -365,7 +409,7 @@ const editAddress = async (req, res) => {
 };
 
 /* ----------------Update Address--------------  */
-const updateAddress = async (req, res) => {
+const updateAddress = async (req, res, next) => {
   try {
     const {
       firstName,
@@ -400,31 +444,35 @@ const updateAddress = async (req, res) => {
     );
     if (update) res.json("success");
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 let Global_Coupon;
 let Global_CouponAmount;
 //Checkout
-const checkout = async (req, res) => {
-  const getCartItems = await cartItems(req.session.user);
-  const user = await isAuth(req.session.user);
-  const address = await User.find({ email: req.session.user }).lean();
-  res.render("checkout", {
-    cartItems: getCartItems.items,
-    categories: user.categories,
-    headerData: user,
-    cartCount: user.cartCount,
-    totalCartSum: getCartItems.total,
-    userAddress: address[0].address,
-  });
+const checkout = async (req, res, next) => {
+  try {
+    const getCartItems = await cartItems(req.session.user);
+    const user = await isAuth(req.session.user);
+    const address = await User.find({ email: req.session.user }).lean();
+    res.render("checkout", {
+      cartItems: getCartItems.items,
+      categories: user.categories,
+      headerData: user,
+      cartCount: user.cartCount,
+      totalCartSum: getCartItems.total,
+      userAddress: address[0].address,
+    });
+  } catch (error) {
+    next(error)
+  }
 };
 
 /* ----------------Order Placement--------------  */
 let paypalUserId;
 let paypalTotalAmount;
 let paypalAddress;
-const orderPlacement = async (req, res) => {
+const orderPlacement = async (req, res, next) => {
   try {
     const { userId, selectedMethod, selectedAdress } = req.body;
     paypalUserId = userId;
@@ -461,27 +509,31 @@ const orderPlacement = async (req, res) => {
       else res.json("error");
     }
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ---------------Paypal Integration--------------  */
-const paypalCheckout = async (req, res) => {
-  const userId = req.params.userId;
-  const user = await isAuth(req.session.user);
+const paypalCheckout = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const user = await isAuth(req.session.user);
 
-  res.render("paypal-integration", {
-    categories: user.categories,
-    headerData: user,
-    cartCount: user.cartCount,
-    totalAmount: paypalTotalAmount,
-    userId: userId,
-    address: paypalAddress,
-  });
+    res.render("paypal-integration", {
+      categories: user.categories,
+      headerData: user,
+      cartCount: user.cartCount,
+      totalAmount: paypalTotalAmount,
+      userId: userId,
+      address: paypalAddress,
+    });
+  } catch (error) {
+    next(error)
+  }
 };
 
 /* ----------------Paypal Checkout--------------  */
-const paypalSummary = async (req, res) => {
+const paypalSummary = async (req, res, next) => {
   try {
     const userId = req.body.userId;
     const selectedMethod = 1;
@@ -495,7 +547,7 @@ const paypalSummary = async (req, res) => {
       res.json("success");
     } else res.json("error");
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
@@ -572,60 +624,68 @@ const checkoutFunc = async (userId, selectedMethod, paypalAddress) => {
 
     return { message: "success", orderId: response?.[0]?._id };
   } catch (error) {
-    console.log(error);
+    console.log(error)
     try {
       const deleteResponse = await Order.deleteMany({ orderId: data.orderId });
-      console.log(deleteResponse);
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 };
 /* ----------------Orders--------------  */
-const orders = async (req, res) => {
-  const user = await isAuth(req.session.user);
-  const ordersList = await Order.find({ userId: user.user._id })
-    .sort({ date: -1 })
-    .lean();
-  let date = moment().format("MMMM Do YYYY, h:mm:ss a");
-  ordersList.forEach((item, i) => {
-    item.status == "Cancelled" ? (item.cancelStatus = "yes") : "";
-    item.date = moment(item.date).format("Do MMM YYYY");
-  });
-  res.render("orders", {
-    orders: ordersList,
-    categories: user.categories,
-    headerData: user,
-    cartCount: user.cartCount,
-  });
+const orders = async (req, res, next) => {
+  try {
+    const user = await isAuth(req.session.user);
+    const ordersList = await Order.find({ userId: user.user._id })
+      .sort({ _id: -1 })
+      .lean();
+    let date = moment().format("MMMM Do YYYY, h:mm:ss a");
+    ordersList.forEach((item, i) => {
+      item.cancelStatus =
+        item.status == "Cancelled" || item.status == "Delivered" ? "yes" : "";
+      item.date = moment(item.date).format("Do MMM YYYY");
+    });
+    res.render("orders", {
+      orders: ordersList,
+      categories: user.categories,
+      headerData: user,
+      cartCount: user.cartCount,
+    });
+  } catch (error) {
+    next(error)
+  }
 };
 
 /* ----------------Cancel Order--------------  */
-const cancelOrder = async (req, res) => {
-  const cancelOrder = await Order.findOneAndUpdate(
-    { _id: req.params.id },
-    { $set: { status: "Cancelled" } },
-    { new: true }
-  );
-  if (cancelOrder) {
-    const products = cancelOrder.product;
-    const incrementQuantity = products.forEach(async function (item, i) {
-      await Product.findByIdAndUpdate(item.id, {
-        $inc: { quantity: item.quantity },
-      });
-    });
-
-    const amount = cancelOrder.total_amount;
-    const addToWallet = await User.updateOne(
-      { _id: cancelOrder.userId },
-      { $inc: { wallet: amount } }
+const cancelOrder = async (req, res, next) => {
+  try {
+    const cancelOrder = await Order.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: { status: "Cancelled" } },
+      { new: true }
     );
-    res.json("success");
-  } else res.json("error");
+    if (cancelOrder) {
+      const products = cancelOrder.product;
+      const incrementQuantity = products.forEach(async function (item, i) {
+        await Product.findByIdAndUpdate(item.id, {
+          $inc: { quantity: item.quantity },
+        });
+      });
+
+      const amount = cancelOrder.total_amount;
+      const addToWallet = await User.updateOne(
+        { _id: cancelOrder.userId },
+        { $inc: { wallet: amount } }
+      );
+      res.json("success");
+    } else res.json("error");
+  } catch (error) {
+    next();
+  }
 };
 
 /* ----------------Order Details--------------  */
-const orderDetails = async (req, res) => {
+const orderDetails = async (req, res, next) => {
   try {
     let invoice = true;
     const order = await Order.findOne({ _id: req.params.id }).lean();
@@ -651,12 +711,12 @@ const orderDetails = async (req, res) => {
       invoice: invoice,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Wallet--------------  */
-const wallet = async (req, res) => {
+const wallet = async (req, res, next) => {
   try {
     const userWallet = await User.find(
       { email: req.session.user },
@@ -675,12 +735,12 @@ const wallet = async (req, res) => {
       walletTransaction: walletTransaction,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------Redeem Coupon--------------  */
-const redeemCoupon = async (req, res) => {
+const redeemCoupon = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.session.user }, { _id: 1 });
     const validateCouponUsed = await Coupon.findOne({
@@ -694,7 +754,7 @@ const redeemCoupon = async (req, res) => {
       if (coupon.length >= 1) {
         var todayDate = moment().format("YYYY-MM-DD");
         var pastDate = coupon[0].date;
-        if (pastDate > todayDate) {
+        if (pastDate >= todayDate) {
           res.json({ success: "success", amount: coupon[0].discount });
         } else res.json({ error: "Invalid coupon !!" });
       } else {
@@ -704,12 +764,12 @@ const redeemCoupon = async (req, res) => {
       res.json({ error: "Coupon already used!!" });
     }
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 /* ----------------invoice--------------  */
-const invoice = async (req, res) => {
+const invoice = async (req, res, next) => {
   try {
     const order = await Order.findOne({ _id: req.params.orderId }).lean();
     const products = order.product;
@@ -723,17 +783,16 @@ const invoice = async (req, res) => {
       invoiceDate: invoiceDate,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
-
 /* ----------------Logout--------------  */
 const logout = async (req, res, next) => {
   try {
     delete req.session.user;
     res.redirect("/user/signin");
   } catch (error) {
-    console.log(error.message);
+    next(error);
   }
 };
 
