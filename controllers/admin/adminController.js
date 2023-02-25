@@ -169,34 +169,45 @@ const editProductView = async (req, res, next) => {
 
 const editProduct = async (req, res, next) => {
   try {
-    console.log(req.files.product_images)
-    if (req.files.product_images) {
-      req.body.images = req.files.product_images.map(function (obj) {
-        return obj.filename;
+    if (!req.error) {
+      if (req.files.product_images) {
+        req.body.images = req.files.product_images.map(function (obj) {
+          return obj.filename;
+        });
+      }
+      if (req.files.thumbnail_image) {
+        const thumbnail = req.files.thumbnail_image;
+        req.body.thumbnail_image = thumbnail[0].filename;
+      }
+      const updateProduct = await Product.findOneAndUpdate(
+        { _id: req.params.productId },
+        {
+          $set: {
+            name: req.body.name,
+            category_id: req.body.category_id,
+            price: req.body.price,
+            unit: req.body.unit,
+            quantity: req.body.quantity,
+            description: req.body.description,
+            thumbnail_image: req.body.thumbnail_image,
+          },
+          $push: {
+            images: { $each: req.body.images ?? [] },
+          },
+        }
+      );
+      res.redirect("/admin/products");
+    } else {
+      const productDetails = await Product.findOne({
+        _id: req.params.productId,
+      }).lean();
+      const categories = await Category.find({ status: true }).lean();
+      res.render("product/editProduct", {
+        productDetails: productDetails,
+        categories: categories,
+        error: "Upload valid image !!",
       });
     }
-    if (req.files.thumbnail_image) {
-      const thumbnail = req.files.thumbnail_image;
-      req.body.thumbnail_image = thumbnail[0].filename;
-    }
-    const updateProduct = await Product.findOneAndUpdate(
-      { _id: req.params.productId },
-      {
-        $set: {
-          name: req.body.name,
-          category_id: req.body.category_id,
-          price: req.body.price,
-          unit: req.body.unit,
-          quantity: req.body.quantity,
-          description: req.body.description,
-          thumbnail_image: req.body.thumbnail_image,
-        },
-        $push:{
-          images: {$each:req.body.images ?? []},
-        },
-      }
-    );
-    res.redirect("/admin/products");
   } catch (error) {
     next(error);
   }

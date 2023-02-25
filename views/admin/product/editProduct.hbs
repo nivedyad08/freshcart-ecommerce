@@ -4,6 +4,11 @@
             <form class="theme-form theme-form-2 mega-form" action="/admin/product/edit/{{productDetails._id}}" method="post" enctype="multipart/form-data">
                 <div class="card">
                     <div class="card-body">
+                        {{#if error}}
+                            <div class="alert alert-danger" role="alert">
+                                {{error}}
+                            </div>
+                        {{/if}}
                         <div class="card-header-2">
                             <h5>Edit Product</h5>
                         </div>
