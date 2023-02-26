@@ -339,7 +339,7 @@
           const deductAmount = actualAmount*amount/100;
           const newAmount = (actualAmount-deductAmount).toFixed(2)
           document.getElementById('couponAmount').value = amount
-          document.getElementById('coupon').innerText = deductAmount
+          document.getElementById('coupon').innerText = deductAmount.toFixed(2)
           document.getElementById('total').innerText = newAmount
           totalAmount = newAmount
 

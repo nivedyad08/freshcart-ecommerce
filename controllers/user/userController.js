@@ -643,7 +643,8 @@ const orders = async (req, res, next) => {
     ordersList.forEach((item, i) => {
       item.cancelStatus =
         item.status == "Cancelled" || item.status == "Delivered" ? "yes" : "";
-      item.date = moment(item.date).format("Do MMM YYYY");
+        item.date = moment(item.date).format("Do MMM YYYY");
+        item.total_amount = item.total_amount.toFixed(2)  
     });
     res.render("orders", {
       orders: ordersList,
