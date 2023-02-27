@@ -27,6 +27,7 @@ const userHome = async (req, res, next) => {
       headerData: user,
       categories: user.categories,
       cartCount: user.cartCount,
+      allProducts: user.products,
       products: products,
     });
   } catch (error) {
@@ -58,6 +59,7 @@ const showProducts = async (req, res, next) => {
         category: categoryName.name,
         headerData: user,
         categories: user.categories,
+        allProducts: user.products,
       });
     } else {
       res.render("products", {
@@ -65,6 +67,7 @@ const showProducts = async (req, res, next) => {
         category: categoryName.name,
         headerData: user,
         categories: user.categories,
+        allProducts: user.products,
       });
     }
   } catch (error) {
@@ -122,6 +125,7 @@ const productDetails = async (req, res, next) => {
         headerData: user,
         cartCount: user.cartCount,
         products: products,
+        allProducts: user.products,
       });
     } else {
       res.redirect("/user/404");
@@ -222,6 +226,7 @@ const showCart = async (req, res, next) => {
     res.render("shop-cart", {
       cartItems: getCartItems.items,
       categories: user.categories,
+      allProducts: user.products,
       headerData: user,
       cartCount: user.cartCount,
       totalCartSum: getCartItems.total,
@@ -276,6 +281,7 @@ const accountSettings = async (req, res, next) => {
     res.render("account-settings", {
       accountSettings: true,
       categories: user.categories,
+      allProducts: user.products,
       headerData: user,
       cartCount: user.cartCount,
       message: "",
@@ -303,6 +309,7 @@ const updateAccountSettings = async (req, res, next) => {
       res.render("account-settings", {
         message: "Account updated successfully !!!",
         categories: user.categories,
+        allProducts: user.products,
         headerData: user,
         cartCount: user.cartCount,
         accountSettings: true,
@@ -329,6 +336,7 @@ const accountAddresses = async (req, res, next) => {
     res.render("address", {
       address: true,
       categories: user.categories,
+      allProducts: user.products,
       headerData: user,
       cartCount: user.cartCount,
       userAddress: address?.[0]?.address,
@@ -458,6 +466,7 @@ const checkout = async (req, res, next) => {
     res.render("checkout", {
       cartItems: getCartItems.items,
       categories: user.categories,
+      allProducts: user.products,
       headerData: user,
       cartCount: user.cartCount,
       totalCartSum: getCartItems.total,
@@ -521,6 +530,7 @@ const paypalCheckout = async (req, res, next) => {
 
     res.render("paypal-integration", {
       categories: user.categories,
+      allProducts: user.products,
       headerData: user,
       cartCount: user.cartCount,
       totalAmount: paypalTotalAmount,
@@ -649,6 +659,7 @@ const orders = async (req, res, next) => {
     res.render("orders", {
       orders: ordersList,
       categories: user.categories,
+      allProducts: user.products,
       headerData: user,
       cartCount: user.cartCount,
     });
@@ -689,6 +700,8 @@ const cancelOrder = async (req, res, next) => {
 const orderDetails = async (req, res, next) => {
   try {
     let invoice = true;
+    const user = await isAuth(req.session.user);
+
     const order = await Order.findOne({ _id: req.params.id }).lean();
     if (order.status != "Delivered") {
       invoice = false;
@@ -702,7 +715,6 @@ const orderDetails = async (req, res, next) => {
     const subtotal = order.couponAmount
       ? order.total_amount + order.couponAmount
       : order.total_amount;
-
     res.render("orderDetails", {
       orderDetails: order,
       products: products,
@@ -710,6 +722,9 @@ const orderDetails = async (req, res, next) => {
       address: address.address,
       subtotal: subtotal,
       invoice: invoice,
+      categories: user.categories,
+      allProducts: user.products,
+      headerData: user,
     });
   } catch (error) {
     next(error);

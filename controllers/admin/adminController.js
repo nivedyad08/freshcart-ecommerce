@@ -394,7 +394,7 @@ const deleteUser = async (req, res, next) => {
 
 /* ----------------Order--------------  */
 const ordersList = async (req, res, next) => {
-  const ordersList = await Order.find({}).lean();
+  const ordersList = await Order.find({}).sort({_id:-1}).lean();
   ordersList.forEach((item, i) => {
     item.cancelStatus =
       item.status == "Cancelled" || item.status == "Delivered" ? "yes" : "";

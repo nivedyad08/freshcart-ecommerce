@@ -13,7 +13,7 @@ module.exports = async (sessionid) => {
   ).lean();
 
   const categories = await Category.find({ status: true }).lean();
-  const products = await Product.find({ status: true }).lean();
+  const products = await Product.find({ status: true },{_id:0,name:1}).lean();
   const cartCount = await User.aggregate([
     { $match: { email: sessionid } },
     { $project: { _id: 0, count: { $size: "$cart" } } },
